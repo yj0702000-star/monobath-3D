@@ -1304,31 +1304,24 @@ let currentZoom = 1;
 let targetZoom = 1;
 
 
-/*
-   위쪽 확인 가능한 범위
-*/
+/* 좌우 회전 제한 */
+const minYaw =
+  THREE.MathUtils.degToRad(-65);
 
+const maxYaw =
+  THREE.MathUtils.degToRad(65);
+
+
+/* 위아래 회전 제한 */
 const minPitch =
-  THREE.MathUtils.degToRad(
-    -5
-  );
+  THREE.MathUtils.degToRad(-3);
 
 const maxPitch =
-  THREE.MathUtils.degToRad(
-    34
-  );
+  THREE.MathUtils.degToRad(28);
 
 
-const minZoom =
-  0.82;
-
-const maxZoom =
-  1.55;
-
-
-/*
-   가벼운 관성
-*/
+const minZoom = 0.82;
+const maxZoom = 1.55;
 
 let yawVelocity = 0;
 
@@ -1680,7 +1673,14 @@ renderer.domElement.addEventListener(
     */
 
     targetYaw +=
-      dx * 0.010;
+  dx * 0.010;
+
+targetYaw =
+  THREE.MathUtils.clamp(
+    targetYaw,
+    minYaw,
+    maxYaw
+  );
 
 
     /*
@@ -2002,27 +2002,37 @@ function animate() {
   );
 
 
-  if (product) {
+  if (
+  !dragging &&
+  Math.abs(yawVelocity) > 0.00005
+) {
 
-    /*
-       손을 놓았을 때
-       아주 살짝 관성
-    */
+  targetYaw +=
+    yawVelocity;
 
-    if (
-      !dragging &&
-      Math.abs(
-        yawVelocity
-      ) > 0.00005
-    ) {
+  targetYaw =
+    THREE.MathUtils.clamp(
+      targetYaw,
+      minYaw,
+      maxYaw
+    );
 
-      targetYaw +=
-        yawVelocity;
+  /*
+     끝에 닿으면
+     관성도 정지
+  */
 
-      yawVelocity *=
-        0.91;
+  if (
+    targetYaw <= minYaw ||
+    targetYaw >= maxYaw
+  ) {
+    yawVelocity = 0;
+  }
+  else {
+    yawVelocity *= 0.91;
+  }
 
-    }
+}
 
 
     /*
