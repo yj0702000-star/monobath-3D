@@ -491,11 +491,14 @@ function applyTile(tileKey) {
   viewerArea.style.backgroundColor = tile.base;
 
   viewerArea.style.backgroundImage = `
-    linear-gradient(to right, ${tile.line} 1px, transparent 1px),
-    linear-gradient(to bottom, ${tile.line} 1px, transparent 1px)
-  `;
+  linear-gradient(to right, ${tile.line} 0.5px, transparent 0.5px),
+  linear-gradient(to bottom, ${tile.line} 0.5px, transparent 0.5px),
+  radial-gradient(circle at 30% 25%, rgba(255,255,255,0.10), transparent 45%),
+  radial-gradient(circle at 70% 70%, rgba(0,0,0,0.018), transparent 50%)
+`;
 
-  viewerArea.style.backgroundSize = '520px 320px';
+viewerArea.style.backgroundSize =
+  '680px 420px, 680px 420px, 100% 100%, 100% 100%';
 
   tileName.textContent = tile.name;
 }
