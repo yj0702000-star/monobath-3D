@@ -9,520 +9,2223 @@
                maximum-scale=1.0,
                user-scalable=no">
 
-<title>MONOBATH Interactive View</title>
+<title>MONOBATH — MONO 600 Configurator</title>
 
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
 
-html, body {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #191919;
-  font-family: Arial, sans-serif;
-}
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-/* =========================
-   VIEWER
-========================= */
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #F4F2ED;
+    font-family:
+      Arial,
+      Helvetica,
+      sans-serif;
+  }
 
-#viewer {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-  background: #191919;
-}
+  body {
+    color: #2E2E2E;
+  }
 
-#viewer.dragging {
-  cursor: grabbing;
-}
+  #app {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: #F4F2ED;
+  }
 
-/* =========================
-   IMAGE
-========================= */
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+  }
 
-#scene {
-  position: absolute;
-  top: 50%;
-  left: 50%;
 
-  width: 100%;
-  height: 100%;
-
-  object-fit: cover;
-
-  transform-origin: center center;
-  will-change: transform;
-
-  pointer-events: none;
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-/* =========================
-   SUBTLE OVERLAY
-========================= */
-
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-  pointer-events: none;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,.13) 0%,
-      rgba(0,0,0,0) 22%,
-      rgba(0,0,0,0) 75%,
-      rgba(0,0,0,.12) 100%
-    );
-}
-
-/* =========================
-   BRAND
-========================= */
-
-.brand {
-  position: fixed;
-  top: 28px;
-  left: 32px;
-  z-index: 100;
-  pointer-events: none;
-}
-
-.brand-small {
-  margin-bottom: 7px;
-  font-size: 10px;
-  letter-spacing: .22em;
-  color: rgba(255,255,255,.76);
-}
-
-.brand-title {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: .05em;
-  color: #fff;
-}
-
-/* =========================
-   CLOSE
-========================= */
-
-.close {
-  position: fixed;
-  top: 24px;
-  right: 28px;
-  z-index: 200;
-
-  width: 42px;
-  height: 42px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border: 1px solid rgba(255,255,255,.35);
-  border-radius: 50%;
-
-  color: white;
-  font-size: 25px;
-  font-weight: 200;
-
-  cursor: pointer;
-
-  background: rgba(0,0,0,.10);
-  backdrop-filter: blur(5px);
-
-  transition:
-    background .25s ease,
-    border-color .25s ease;
-}
-
-.close:hover {
-  background: rgba(0,0,0,.28);
-  border-color: rgba(255,255,255,.7);
-}
-
-/* =========================
-   GUIDE
-========================= */
-
-.guide {
-  position: fixed;
-  left: 50%;
-  bottom: 27px;
-  transform: translateX(-50%);
-  z-index: 100;
-
-  font-size: 10px;
-  letter-spacing: .18em;
-
-  color: rgba(255,255,255,.82);
-
-  white-space: nowrap;
-  pointer-events: none;
-
-  transition: opacity .5s ease;
-}
-
-.guide.hide {
-  opacity: 0;
-}
-
-/* =========================
-   ZOOM INDICATOR
-========================= */
-
-.zoom-indicator {
-  position: fixed;
-  right: 30px;
-  bottom: 27px;
-  z-index: 100;
-
-  font-size: 10px;
-  letter-spacing: .12em;
-
-  color: rgba(255,255,255,.7);
-  pointer-events: none;
-}
-
-/* =========================
-   MOBILE
-========================= */
-
-@media (max-width: 768px) {
+  /* ===================================
+     TOP BRAND
+  =================================== */
 
   .brand {
-    top: 20px;
-    left: 20px;
+    position: fixed;
+    z-index: 20;
+
+    top: 30px;
+    left: 34px;
+
+    pointer-events: none;
   }
 
-  .close {
-    top: 17px;
-    right: 17px;
-    width: 38px;
-    height: 38px;
+  .brand-small {
+    font-size: 10px;
+    font-weight: 500;
+
+    letter-spacing: 0.24em;
+
+    color: rgba(46,46,46,.62);
+
+    margin-bottom: 7px;
   }
+
+  .brand-title {
+    font-size: 15px;
+    font-weight: 600;
+
+    letter-spacing: 0.05em;
+
+    color: #2E2E2E;
+  }
+
+
+  /* ===================================
+     TOP RIGHT
+  =================================== */
+
+  .top-controls {
+    position: fixed;
+    z-index: 20;
+
+    top: 27px;
+    right: 30px;
+
+    display: flex;
+    gap: 9px;
+  }
+
+  .ghost-button {
+    height: 38px;
+
+    padding: 0 16px;
+
+    border-radius: 100px;
+
+    border:
+      1px solid rgba(46,46,46,.18);
+
+    background:
+      rgba(247,246,243,.72);
+
+    backdrop-filter: blur(12px);
+
+    font-size: 10px;
+    font-weight: 500;
+
+    letter-spacing: .12em;
+
+    color: #2E2E2E;
+
+    cursor: pointer;
+
+    transition:
+      background .25s ease,
+      border-color .25s ease;
+  }
+
+  .ghost-button:hover {
+    background:
+      rgba(247,246,243,.95);
+
+    border-color:
+      rgba(46,46,46,.35);
+  }
+
+
+  /* ===================================
+     CONFIGURATOR PANEL
+  =================================== */
+
+  .config-panel {
+
+    position: fixed;
+
+    z-index: 20;
+
+    right: 30px;
+    bottom: 30px;
+
+    width: 270px;
+
+    padding: 22px 22px 20px;
+
+    border:
+      1px solid rgba(46,46,46,.12);
+
+    background:
+      rgba(247,246,243,.84);
+
+    backdrop-filter:
+      blur(18px);
+
+    border-radius: 3px;
+
+    box-shadow:
+      0 15px 50px rgba(0,0,0,.07);
+  }
+
+  .option-block + .option-block {
+    margin-top: 22px;
+    padding-top: 20px;
+
+    border-top:
+      1px solid rgba(46,46,46,.10);
+  }
+
+  .option-label {
+    font-size: 9px;
+    font-weight: 600;
+
+    letter-spacing: .19em;
+
+    color: rgba(46,46,46,.54);
+
+    margin-bottom: 13px;
+  }
+
+  .option-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    font-size: 12px;
+    font-weight: 500;
+
+    margin-bottom: 12px;
+  }
+
+  .current-value {
+    font-size: 10px;
+
+    color: rgba(46,46,46,.50);
+  }
+
+  .swatches {
+    display: flex;
+    gap: 10px;
+  }
+
+  .swatch {
+    width: 31px;
+    height: 31px;
+
+    border-radius: 50%;
+
+    border:
+      1px solid rgba(46,46,46,.15);
+
+    cursor: pointer;
+
+    position: relative;
+
+    transition:
+      transform .2s ease,
+      box-shadow .2s ease;
+  }
+
+  .swatch:hover {
+    transform: scale(1.08);
+  }
+
+  .swatch.active::after {
+    content: "";
+
+    position: absolute;
+
+    inset: -5px;
+
+    border-radius: 50%;
+
+    border:
+      1px solid rgba(46,46,46,.65);
+  }
+
+
+  /* ===================================
+     GUIDE
+  =================================== */
 
   .guide {
-    bottom: 20px;
+
+    position: fixed;
+
+    z-index: 20;
+
+    left: 50%;
+    bottom: 31px;
+
+    transform:
+      translateX(-50%);
+
     font-size: 9px;
+
+    font-weight: 500;
+
+    letter-spacing: .16em;
+
+    color:
+      rgba(46,46,46,.48);
+
+    pointer-events: none;
+
+    white-space: nowrap;
+
+    transition:
+      opacity .5s ease;
   }
 
-  .zoom-indicator {
-    display: none;
+  .guide.hide {
+    opacity: 0;
+  }
+
+
+  /* ===================================
+     LOADER
+  =================================== */
+
+  #loader {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 100;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    background: #F7F6F3;
+
+    transition:
+      opacity .55s ease,
+      visibility .55s ease;
+  }
+
+  #loader.hide {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .loader-brand {
+
+    font-size: 12px;
+    font-weight: 600;
+
+    letter-spacing: .23em;
+
+    margin-bottom: 19px;
+  }
+
+  .loader-line {
+
+    width: 130px;
+    height: 1px;
+
+    background:
+      rgba(46,46,46,.15);
+
+    overflow: hidden;
+  }
+
+  .loader-progress {
+
+    width: 0%;
+    height: 100%;
+
+    background: #2E2E2E;
+
+    transition:
+      width .15s linear;
+  }
+
+
+  /* ===================================
+     MOBILE
+  =================================== */
+
+  @media(max-width: 768px) {
+
+    .brand {
+      top: 20px;
+      left: 20px;
+    }
+
+    .top-controls {
+      top: 18px;
+      right: 18px;
+    }
+
+    .ghost-button {
+      padding: 0 13px;
+    }
+
+    .config-panel {
+
+      left: 14px;
+      right: 14px;
+
+      bottom: 14px;
+
+      width: auto;
+
+      display: flex;
+      gap: 22px;
+
+      padding: 17px 18px;
+    }
+
+    .option-block {
+
+      flex: 1;
+    }
+
+    .option-block + .option-block {
+
+      margin-top: 0;
+
+      padding-top: 0;
+
+      border-top: 0;
+
+      border-left:
+        1px solid rgba(46,46,46,.10);
+
+      padding-left: 20px;
+    }
+
+    .swatch {
+
+      width: 27px;
+      height: 27px;
+    }
+
+    .guide {
+
+      bottom: 150px;
+
+      font-size: 8px;
+    }
+
+  }
+
+</style>
+
+
+<script type="importmap">
+{
+  "imports": {
+    "three":
+      "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+
+    "three/addons/":
+      "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
   }
 }
-</style>
+</script>
+
 </head>
+
 
 <body>
 
-<div id="viewer">
+<div id="app"></div>
 
-  <img
-    id="scene"
-    src="./MONOBATH_PANORAMA_180_FINAL_8K.png"
-    alt="MONOBATH Interactive View"
-    draggable="false"
-  >
+
+<!-- LOADER -->
+
+<div id="loader">
+
+  <div class="loader-brand">
+    MONOBATH
+  </div>
+
+  <div class="loader-line">
+    <div
+      class="loader-progress"
+      id="loaderProgress">
+    </div>
+  </div>
 
 </div>
 
-<div class="overlay"></div>
+
+<!-- BRAND -->
 
 <div class="brand">
-  <div class="brand-small">MONOBATH</div>
-  <div class="brand-title">INTERACTIVE VIEW</div>
-</div>
 
-<div class="close" id="closeButton">×</div>
+  <div class="brand-small">
+    MONOBATH
+  </div>
 
-<div class="guide" id="guide">
-  DRAG TO EXPLORE · SCROLL TO ZOOM
-</div>
+  <div class="brand-title">
+    MONO 600 CONFIGURATOR
+  </div>
 
-<div class="zoom-indicator" id="zoomIndicator">
-  100%
 </div>
 
 
-<script>
+<!-- TOP -->
 
-const viewer = document.getElementById("viewer");
-const scene = document.getElementById("scene");
-const guide = document.getElementById("guide");
-const zoomIndicator = document.getElementById("zoomIndicator");
-const closeButton = document.getElementById("closeButton");
+<div class="top-controls">
 
+  <button
+    class="ghost-button"
+    id="resetView">
 
-/* =========================
-   STATE
-========================= */
+    RESET VIEW
 
-let scale = 1;
+  </button>
 
-const minScale = 1;
-const maxScale = 2.6;
-
-let x = 0;
-let y = 0;
-
-let startX = 0;
-let startY = 0;
-
-let startPanX = 0;
-let startPanY = 0;
-
-let dragging = false;
-let hasInteracted = false;
+</div>
 
 
-/* =========================
-   LIMIT POSITION
-========================= */
+<!-- GUIDE -->
 
-function clampPosition() {
+<div
+  class="guide"
+  id="guide">
 
-  const width = viewer.clientWidth;
-  const height = viewer.clientHeight;
+  DRAG TO ROTATE · DRAG UP TO VIEW TOP · SCROLL TO ZOOM
 
-  const maxX = ((width * scale) - width) / 2;
-  const maxY = ((height * scale) - height) / 2;
+</div>
 
-  x = Math.max(-maxX, Math.min(maxX, x));
-  y = Math.max(-maxY, Math.min(maxY, y));
+
+<!-- CONFIG -->
+
+<div class="config-panel">
+
+
+  <!-- BASIN -->
+
+  <div class="option-block">
+
+    <div class="option-label">
+      BASIN COLOR
+    </div>
+
+    <div class="option-title">
+
+      <span>MONO 600</span>
+
+      <span
+        class="current-value"
+        id="basinName">
+
+        PURE WHITE
+
+      </span>
+
+    </div>
+
+    <div class="swatches">
+
+      <button
+        class="swatch basin-swatch"
+        data-color="#E4E5E3"
+        data-name="FROZEN WHITE"
+        style="background:#E4E5E3">
+      </button>
+
+      <button
+        class="swatch basin-swatch active"
+        data-color="#F4F3EF"
+        data-name="PURE WHITE"
+        style="background:#F4F3EF">
+      </button>
+
+      <button
+        class="swatch basin-swatch"
+        data-color="#C7B8A3"
+        data-name="SAND BEIGE"
+        style="background:#C7B8A3">
+      </button>
+
+      <button
+        class="swatch basin-swatch"
+        data-color="#858784"
+        data-name="URBAN GREY"
+        style="background:#858784">
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- TILE -->
+
+  <div class="option-block">
+
+    <div class="option-label">
+      600 × 600 TILE
+    </div>
+
+    <div class="option-title">
+
+      <span>BACKGROUND</span>
+
+      <span
+        class="current-value"
+        id="tileName">
+
+        IVORY
+
+      </span>
+
+    </div>
+
+    <div class="swatches">
+
+      <button
+        class="swatch tile-swatch"
+        data-color="#E8E7E3"
+        data-name="WHITE"
+        style="background:#E8E7E3">
+      </button>
+
+      <button
+        class="swatch tile-swatch active"
+        data-color="#D7D0C5"
+        data-name="IVORY"
+        style="background:#D7D0C5">
+      </button>
+
+      <button
+        class="swatch tile-swatch"
+        data-color="#A6A6A3"
+        data-name="GREY"
+        style="background:#A6A6A3">
+      </button>
+
+      <button
+        class="swatch tile-swatch"
+        data-color="#484846"
+        data-name="CHARCOAL"
+        style="background:#484846">
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<script type="module">
+
+import * as THREE from "three";
+
+import {
+  GLTFLoader
+} from "three/addons/loaders/GLTFLoader.js";
+
+import {
+  RGBELoader
+} from "three/addons/loaders/RGBELoader.js";
+
+import {
+  RoomEnvironment
+} from "three/addons/environments/RoomEnvironment.js";
+
+
+
+/* =============================================
+   BASIC
+============================================= */
+
+const container =
+  document.getElementById("app");
+
+const guide =
+  document.getElementById("guide");
+
+const loaderElement =
+  document.getElementById("loader");
+
+const loaderProgress =
+  document.getElementById("loaderProgress");
+
+
+const scene =
+  new THREE.Scene();
+
+
+scene.background =
+  new THREE.Color(0xF4F2ED);
+
+
+
+/* =============================================
+   CAMERA
+============================================= */
+
+const camera =
+  new THREE.PerspectiveCamera(
+    35,
+    window.innerWidth /
+    window.innerHeight,
+    0.01,
+    100
+  );
+
+
+const cameraTarget =
+  new THREE.Vector3(
+    0,
+    0.92,
+    0
+  );
+
+
+let radius = 1.65;
+
+let pitch =
+  THREE.MathUtils.degToRad(13);
+
+
+const minRadius = 1.0;
+const maxRadius = 2.45;
+
+const minPitch =
+  THREE.MathUtils.degToRad(2);
+
+const maxPitch =
+  THREE.MathUtils.degToRad(48);
+
+
+
+function updateCamera() {
+
+  const y =
+    cameraTarget.y +
+    Math.sin(pitch) *
+    radius;
+
+  const z =
+    cameraTarget.z +
+    Math.cos(pitch) *
+    radius;
+
+  camera.position.set(
+    0,
+    y,
+    z
+  );
+
+  camera.lookAt(
+    cameraTarget
+  );
+
 }
 
 
-/* =========================
-   RENDER
-========================= */
-
-function render() {
-
-  clampPosition();
-
-  scene.style.transform =
-    `translate(calc(-50% + ${x}px),
-               calc(-50% + ${y}px))
-     scale(${scale})`;
-
-  zoomIndicator.textContent =
-    `${Math.round(scale * 100)}%`;
-}
+updateCamera();
 
 
-/* =========================
-   DRAG START
-========================= */
 
-viewer.addEventListener("pointerdown", e => {
+/* =============================================
+   RENDERER
+============================================= */
 
-  dragging = true;
+const renderer =
+  new THREE.WebGLRenderer({
 
-  startX = e.clientX;
-  startY = e.clientY;
+    antialias: true,
 
-  startPanX = x;
-  startPanY = y;
+    alpha: false,
 
-  viewer.classList.add("dragging");
+    powerPreference:
+      "high-performance"
 
-  viewer.setPointerCapture(e.pointerId);
-});
+  });
 
 
-/* =========================
-   DRAG MOVE
-========================= */
-
-viewer.addEventListener("pointermove", e => {
-
-  if (!dragging) return;
-
-  const dx = e.clientX - startX;
-  const dy = e.clientY - startY;
-
-  x = startPanX + dx;
-  y = startPanY + dy;
-
-  render();
-
-  if (!hasInteracted &&
-      (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
-
-    hasInteracted = true;
-    guide.classList.add("hide");
-  }
-
-});
+renderer.setSize(
+  window.innerWidth,
+  window.innerHeight
+);
 
 
-/* =========================
-   DRAG END
-========================= */
+renderer.setPixelRatio(
 
-function endDrag(e) {
+  Math.min(
+    window.devicePixelRatio,
+    2
+  )
 
-  dragging = false;
-  viewer.classList.remove("dragging");
-
-  try {
-    viewer.releasePointerCapture(e.pointerId);
-  } catch(err) {}
-}
-
-viewer.addEventListener("pointerup", endDrag);
-viewer.addEventListener("pointercancel", endDrag);
+);
 
 
-/* =========================
-   MOUSE WHEEL ZOOM
-========================= */
+renderer.outputColorSpace =
+  THREE.SRGBColorSpace;
 
-viewer.addEventListener(
-  "wheel",
-  e => {
 
-    e.preventDefault();
+renderer.toneMapping =
+  THREE.ACESFilmicToneMapping;
 
-    const oldScale = scale;
 
-    const zoomSpeed = 0.12;
+renderer.toneMappingExposure =
+  1.12;
 
-    if (e.deltaY < 0) {
-      scale += zoomSpeed;
-    } else {
-      scale -= zoomSpeed;
+
+renderer.shadowMap.enabled =
+  true;
+
+
+renderer.shadowMap.type =
+  THREE.PCFSoftShadowMap;
+
+
+container.appendChild(
+  renderer.domElement
+);
+
+
+
+/* =============================================
+   HDR ENVIRONMENT
+============================================= */
+
+const pmremGenerator =
+  new THREE.PMREMGenerator(
+    renderer
+  );
+
+
+pmremGenerator.compileEquirectangularShader();
+
+
+const roomEnvironment =
+  new RoomEnvironment();
+
+
+const fallbackEnvironment =
+  pmremGenerator
+    .fromScene(
+      roomEnvironment,
+      0.04
+    )
+    .texture;
+
+
+scene.environment =
+  fallbackEnvironment;
+
+
+
+new RGBELoader()
+  .load(
+
+    "./white_studio_06_1k.hdr",
+
+    hdr => {
+
+      const envMap =
+        pmremGenerator
+          .fromEquirectangular(
+            hdr
+          )
+          .texture;
+
+      scene.environment =
+        envMap;
+
+      hdr.dispose();
+
+      pmremGenerator.dispose();
+
+    },
+
+    undefined,
+
+    error => {
+
+      console.warn(
+        "HDRI fallback active",
+        error
+      );
+
     }
 
-    scale = Math.max(
-      minScale,
-      Math.min(maxScale, scale)
+  );
+
+
+
+/* =============================================
+   LIGHTS
+============================================= */
+
+
+/*
+   HDRI = 기본 반사
+
+   Directional Light =
+   제품 모서리와 경사면을
+   보여주는 소프트 키 라이트
+*/
+
+
+const keyLight =
+  new THREE.DirectionalLight(
+    0xFFF7ED,
+    2.8
+  );
+
+
+keyLight.position.set(
+  -2.2,
+  3.4,
+  3.0
+);
+
+
+keyLight.castShadow =
+  true;
+
+
+keyLight.shadow.mapSize.set(
+  2048,
+  2048
+);
+
+
+keyLight.shadow.camera.left =
+  -2;
+
+keyLight.shadow.camera.right =
+  2;
+
+keyLight.shadow.camera.top =
+  2;
+
+keyLight.shadow.camera.bottom =
+  -2;
+
+
+keyLight.shadow.bias =
+  -0.0002;
+
+
+scene.add(
+  keyLight
+);
+
+
+
+const fillLight =
+  new THREE.DirectionalLight(
+    0xDDE5EA,
+    0.72
+  );
+
+
+fillLight.position.set(
+  2.5,
+  1.8,
+  2
+);
+
+
+scene.add(
+  fillLight
+);
+
+
+
+const hemisphereLight =
+  new THREE.HemisphereLight(
+
+    0xFFFFFF,
+
+    0xC8C5BF,
+
+    0.60
+
+  );
+
+
+scene.add(
+  hemisphereLight
+);
+
+
+
+/* =============================================
+   TILE TEXTURE
+============================================= */
+
+
+function makeTileTexture(
+  baseColor
+) {
+
+  const size =
+    512;
+
+
+  const canvas =
+    document.createElement(
+      "canvas"
+    );
+
+
+  canvas.width =
+    size;
+
+
+  canvas.height =
+    size;
+
+
+  const ctx =
+    canvas.getContext(
+      "2d"
+    );
+
+
+  /*
+     Base
+  */
+
+  ctx.fillStyle =
+    baseColor;
+
+
+  ctx.fillRect(
+    0,
+    0,
+    size,
+    size
+  );
+
+
+  /*
+     Very subtle surface variation
+  */
+
+  const imageData =
+    ctx.getImageData(
+      0,
+      0,
+      size,
+      size
+    );
+
+
+  const data =
+    imageData.data;
+
+
+  for (
+    let i = 0;
+    i < data.length;
+    i += 4
+  ) {
+
+    const variation =
+      (Math.random() - .5)
+      * 3.2;
+
+
+    data[i] +=
+      variation;
+
+    data[i + 1] +=
+      variation;
+
+    data[i + 2] +=
+      variation;
+
+  }
+
+
+  ctx.putImageData(
+    imageData,
+    0,
+    0
+  );
+
+
+  /*
+     600x600 tile grout
+  */
+
+  ctx.strokeStyle =
+    "rgba(90,90,90,.20)";
+
+
+  ctx.lineWidth =
+    3;
+
+
+  ctx.strokeRect(
+    1.5,
+    1.5,
+    size - 3,
+    size - 3
+  );
+
+
+  /*
+     Slight soft highlight
+  */
+
+  const gradient =
+    ctx.createLinearGradient(
+      0,
+      0,
+      size,
+      size
+    );
+
+
+  gradient.addColorStop(
+    0,
+    "rgba(255,255,255,.045)"
+  );
+
+
+  gradient.addColorStop(
+    1,
+    "rgba(0,0,0,.018)"
+  );
+
+
+  ctx.fillStyle =
+    gradient;
+
+
+  ctx.fillRect(
+    0,
+    0,
+    size,
+    size
+  );
+
+
+  const texture =
+    new THREE.CanvasTexture(
+      canvas
+    );
+
+
+  texture.wrapS =
+    THREE.RepeatWrapping;
+
+
+  texture.wrapT =
+    THREE.RepeatWrapping;
+
+
+  texture.colorSpace =
+    THREE.SRGBColorSpace;
+
+
+  texture.anisotropy =
+    renderer.capabilities
+      .getMaxAnisotropy();
+
+
+  return texture;
+
+}
+
+
+
+/* =============================================
+   WALL + FLOOR
+============================================= */
+
+
+const wallMaterial =
+  new THREE.MeshPhysicalMaterial({
+
+    color:
+      0xFFFFFF,
+
+    roughness:
+      0.72,
+
+    metalness:
+      0,
+
+    envMapIntensity:
+      0.55
+
+  });
+
+
+const floorMaterial =
+  new THREE.MeshPhysicalMaterial({
+
+    color:
+      0xFFFFFF,
+
+    roughness:
+      0.67,
+
+    metalness:
+      0,
+
+    envMapIntensity:
+      0.65
+
+  });
+
+
+
+const wall =
+  new THREE.Mesh(
+
+    new THREE.PlaneGeometry(
+      3.6,
+      2.8
+    ),
+
+    wallMaterial
+
+  );
+
+
+wall.position.set(
+  0,
+  1.4,
+  -0.38
+);
+
+
+wall.receiveShadow =
+  true;
+
+
+scene.add(
+  wall
+);
+
+
+
+const floor =
+  new THREE.Mesh(
+
+    new THREE.PlaneGeometry(
+      3.6,
+      3
+    ),
+
+    floorMaterial
+
+  );
+
+
+floor.rotation.x =
+  -Math.PI / 2;
+
+
+floor.position.set(
+  0,
+  0,
+  0.95
+);
+
+
+floor.receiveShadow =
+  true;
+
+
+scene.add(
+  floor
+);
+
+
+
+let wallTileTexture = null;
+let floorTileTexture = null;
+
+
+
+function setTileColor(
+  color
+) {
+
+  if (wallTileTexture)
+    wallTileTexture.dispose();
+
+
+  if (floorTileTexture)
+    floorTileTexture.dispose();
+
+
+  wallTileTexture =
+    makeTileTexture(
+      color
+    );
+
+
+  floorTileTexture =
+    makeTileTexture(
+      color
+    );
+
+
+  /*
+     Wall width 3.6m
+     600mm tile
+
+     = 6 tiles
+  */
+
+  wallTileTexture.repeat.set(
+    6,
+    4.6667
+  );
+
+
+  /*
+     Floor
+     3.6m x 3m
+
+     = 6 x 5 tiles
+  */
+
+  floorTileTexture.repeat.set(
+    6,
+    5
+  );
+
+
+  wallMaterial.map =
+    wallTileTexture;
+
+
+  floorMaterial.map =
+    floorTileTexture;
+
+
+  wallMaterial.needsUpdate =
+    true;
+
+
+  floorMaterial.needsUpdate =
+    true;
+
+}
+
+
+setTileColor(
+  "#D7D0C5"
+);
+
+
+
+/* =============================================
+   PRODUCT MATERIALS
+============================================= */
+
+
+/*
+   MMA SOLID SURFACE
+
+   Glossy ceramic X
+
+   Soft satin solid surface O
+*/
+
+
+const basinMaterial =
+  new THREE.MeshPhysicalMaterial({
+
+    color:
+      new THREE.Color(
+        "#F4F3EF"
+      ),
+
+    metalness:
+      0,
+
+    roughness:
+      0.33,
+
+    ior:
+      1.48,
+
+    specularIntensity:
+      0.62,
+
+    envMapIntensity:
+      1.15,
+
+    clearcoat:
+      0.045,
+
+    clearcoatRoughness:
+      0.40
+
+  });
+
+
+
+/*
+   POLISHED CHROME
+*/
+
+const faucetMaterial =
+  new THREE.MeshPhysicalMaterial({
+
+    color:
+      new THREE.Color(
+        "#D8DADC"
+      ),
+
+    metalness:
+      1,
+
+    roughness:
+      0.12,
+
+    envMapIntensity:
+      1.75,
+
+    clearcoat:
+      0.04,
+
+    clearcoatRoughness:
+      0.12
+
+  });
+
+
+
+/* =============================================
+   MODEL
+============================================= */
+
+
+let product =
+  null;
+
+
+let productRotationY =
+  0;
+
+
+const gltfLoader =
+  new GLTFLoader();
+
+
+
+function chooseMaterial(
+  originalMaterial,
+  objectName = ""
+) {
+
+  const materialName =
+    originalMaterial?.name ||
+    "";
+
+
+  const source =
+    (
+      materialName +
+      " " +
+      objectName
+    )
+    .toLowerCase();
+
+
+  /*
+     Previous GLB material:
+     Metal Corrugated Shiny
+
+     Also support:
+     Chrome / Faucet / Silver / Cromo
+  */
+
+  if (
+
+    source.includes("metal") ||
+
+    source.includes("chrome") ||
+
+    source.includes("corrugated") ||
+
+    source.includes("faucet") ||
+
+    source.includes("silver") ||
+
+    source.includes("cromo") ||
+
+    source.includes("tap")
+
+  ) {
+
+    return faucetMaterial;
+
+  }
+
+
+  /*
+     Everything else in this
+     two-material MONO600 GLB
+     becomes MMA.
+  */
+
+  return basinMaterial;
+
+}
+
+
+
+gltfLoader.load(
+
+  "./MONOBATH_MONO600.glb",
+
+
+  gltf => {
+
+    product =
+      gltf.scene;
+
+
+    product.traverse(
+      object => {
+
+        if (!object.isMesh)
+          return;
+
+
+        object.castShadow =
+          true;
+
+
+        object.receiveShadow =
+          true;
+
+
+        /*
+           Multi material support
+        */
+
+        if (
+          Array.isArray(
+            object.material
+          )
+        ) {
+
+          object.material =
+            object.material.map(
+
+              mat =>
+                chooseMaterial(
+                  mat,
+                  object.name
+                )
+
+            );
+
+        }
+
+        else {
+
+          object.material =
+            chooseMaterial(
+
+              object.material,
+
+              object.name
+
+            );
+
+        }
+
+      }
     );
 
 
     /*
-      마우스가 있는 위치를 중심으로
-      확대되는 느낌
+       NORMALISE EXACTLY TO
+       MONO 600 WIDTH = 600mm
     */
 
-    if (scale !== oldScale) {
-
-      const rect =
-        viewer.getBoundingClientRect();
-
-      const mouseX =
-        e.clientX -
-        rect.left -
-        rect.width / 2;
-
-      const mouseY =
-        e.clientY -
-        rect.top -
-        rect.height / 2;
-
-      const ratio =
-        scale / oldScale;
-
-      x =
-        mouseX -
-        (mouseX - x) * ratio;
-
-      y =
-        mouseY -
-        (mouseY - y) * ratio;
-
-    }
-
-    render();
-
-    guide.classList.add("hide");
-
-  },
-  { passive: false }
-);
+    let box =
+      new THREE.Box3()
+        .setFromObject(
+          product
+        );
 
 
-/* =========================
-   DOUBLE CLICK RESET
-========================= */
-
-viewer.addEventListener(
-  "dblclick",
-  () => {
-
-    scale = 1;
-    x = 0;
-    y = 0;
-
-    render();
-
-  }
-);
+    let size =
+      new THREE.Vector3();
 
 
-/* =========================
-   CLOSE
-========================= */
+    box.getSize(
+      size
+    );
 
-closeButton.addEventListener(
-  "click",
-  () => {
+
+    const scale =
+      0.60 /
+      size.x;
+
+
+    product.scale
+      .setScalar(
+        scale
+      );
+
 
     /*
-      나중에 아임웹 모달과 연결하면
-      여기만 바꾸면 됨.
-
-      현재 GitHub 단독 테스트에서는
-      이전 페이지로 이동.
+       Recalculate box
     */
 
-    if (window.history.length > 1) {
-      window.history.back();
+    box =
+      new THREE.Box3()
+        .setFromObject(
+          product
+        );
+
+
+    const center =
+      new THREE.Vector3();
+
+
+    box.getCenter(
+      center
+    );
+
+
+    /*
+       Center horizontally
+       and depth
+    */
+
+    product.position.x -=
+      center.x;
+
+
+    product.position.z -=
+      center.z;
+
+
+    /*
+       Bottom height
+       720mm from floor
+    */
+
+    box =
+      new THREE.Box3()
+        .setFromObject(
+          product
+        );
+
+
+    product.position.y +=
+      0.72 -
+      box.min.y;
+
+
+    scene.add(
+      product
+    );
+
+
+    /*
+       Product target
+    */
+
+    const finalBox =
+      new THREE.Box3()
+        .setFromObject(
+          product
+        );
+
+
+    const finalCenter =
+      new THREE.Vector3();
+
+
+    finalBox.getCenter(
+      finalCenter
+    );
+
+
+    cameraTarget.set(
+
+      finalCenter.x,
+
+      finalCenter.y,
+
+      finalCenter.z
+
+    );
+
+
+    updateCamera();
+
+
+    loaderProgress
+      .style.width =
+      "100%";
+
+
+    setTimeout(
+      () => {
+
+        loaderElement
+          .classList
+          .add(
+            "hide"
+          );
+
+      },
+      250
+    );
+
+  },
+
+
+  xhr => {
+
+    if (
+      xhr.total
+    ) {
+
+      const percent =
+        xhr.loaded /
+        xhr.total *
+        100;
+
+
+      loaderProgress
+        .style.width =
+        `${percent}%`;
+
     }
 
-  }
-);
+  },
 
 
-/* =========================
-   INITIALIZE
-========================= */
+  error => {
 
-scene.addEventListener(
-  "load",
-  () => {
-
-    scale = 1;
-    x = 0;
-    y = 0;
-
-    render();
+    console.error(
+      "MONO600 GLB LOAD ERROR",
+      error
+    );
 
   }
+
 );
 
 
-window.addEventListener(
-  "resize",
-  render
-);
+
+/* =============================================
+   INTERACTION
+============================================= */
 
 
-if (scene.complete) {
-  render();
+let dragging =
+  false;
+
+
+let startX =
+  0;
+
+
+let startY =
+  0;
+
+
+let startRotation =
+  0;
+
+
+let startPitch =
+  pitch;
+
+
+let hasInteracted =
+  false;
+
+
+
+renderer.domElement
+  .addEventListener(
+
+    "pointerdown",
+
+    event => {
+
+      dragging =
+        true;
+
+
+      startX =
+        event.clientX;
+
+
+      startY =
+        event.clientY;
+
+
+      startRotation =
+        productRotationY;
+
+
+      startPitch =
+        pitch;
+
+
+      renderer.domElement
+        .setPointerCapture(
+          event.pointerId
+        );
+
+
+      renderer.domElement
+        .style.cursor =
+        "grabbing";
+
+    }
+
+  );
+
+
+
+renderer.domElement
+  .addEventListener(
+
+    "pointermove",
+
+    event => {
+
+      if (
+        !dragging ||
+        !product
+      )
+        return;
+
+
+      const dx =
+        event.clientX -
+        startX;
+
+
+      const dy =
+        event.clientY -
+        startY;
+
+
+      /*
+         Horizontal drag
+         rotates PRODUCT
+      */
+
+      productRotationY =
+        startRotation +
+        dx * 0.008;
+
+
+      product.rotation.y =
+        productRotationY;
+
+
+      /*
+         Vertical drag
+         moves CAMERA upward
+
+         Drag upward
+         = look from above
+      */
+
+      pitch =
+        startPitch -
+        dy * 0.004;
+
+
+      pitch =
+        THREE.MathUtils.clamp(
+
+          pitch,
+
+          minPitch,
+
+          maxPitch
+
+        );
+
+
+      updateCamera();
+
+
+      if (
+        !hasInteracted &&
+        (
+          Math.abs(dx) > 6 ||
+          Math.abs(dy) > 6
+        )
+      ) {
+
+        hasInteracted =
+          true;
+
+
+        guide
+          .classList
+          .add(
+            "hide"
+          );
+
+      }
+
+    }
+
+  );
+
+
+
+function stopDragging(
+  event
+) {
+
+  dragging =
+    false;
+
+
+  renderer.domElement
+    .style.cursor =
+    "grab";
+
+
+  try {
+
+    renderer.domElement
+      .releasePointerCapture(
+        event.pointerId
+      );
+
+  }
+
+  catch(error) {}
+
 }
+
+
+
+renderer.domElement
+  .addEventListener(
+    "pointerup",
+    stopDragging
+  );
+
+
+renderer.domElement
+  .addEventListener(
+    "pointercancel",
+    stopDragging
+  );
+
+
+renderer.domElement
+  .style.cursor =
+  "grab";
+
+
+
+/* =============================================
+   ZOOM
+============================================= */
+
+
+renderer.domElement
+  .addEventListener(
+
+    "wheel",
+
+    event => {
+
+      event.preventDefault();
+
+
+      radius +=
+        event.deltaY *
+        0.0012;
+
+
+      radius =
+        THREE.MathUtils.clamp(
+
+          radius,
+
+          minRadius,
+
+          maxRadius
+
+        );
+
+
+      updateCamera();
+
+
+      guide
+        .classList
+        .add(
+          "hide"
+        );
+
+    },
+
+    {
+      passive: false
+    }
+
+  );
+
+
+
+/* =============================================
+   RESET
+============================================= */
+
+
+document
+  .getElementById(
+    "resetView"
+  )
+  .addEventListener(
+
+    "click",
+
+    () => {
+
+      radius =
+        1.65;
+
+
+      pitch =
+        THREE.MathUtils
+          .degToRad(
+            13
+          );
+
+
+      productRotationY =
+        0;
+
+
+      if (product) {
+
+        product.rotation.y =
+          0;
+
+      }
+
+
+      updateCamera();
+
+    }
+
+  );
+
+
+
+/* =============================================
+   BASIN COLOR
+============================================= */
+
+
+const basinName =
+  document.getElementById(
+    "basinName"
+  );
+
+
+document
+  .querySelectorAll(
+    ".basin-swatch"
+  )
+  .forEach(
+
+    button => {
+
+      button
+        .addEventListener(
+
+          "click",
+
+          () => {
+
+            document
+              .querySelectorAll(
+                ".basin-swatch"
+              )
+              .forEach(
+                item =>
+                  item.classList
+                    .remove(
+                      "active"
+                    )
+              );
+
+
+            button
+              .classList
+              .add(
+                "active"
+              );
+
+
+            basinMaterial
+              .color
+              .set(
+                button.dataset.color
+              );
+
+
+            basinName
+              .textContent =
+              button.dataset.name;
+
+          }
+
+        );
+
+    }
+
+  );
+
+
+
+/* =============================================
+   TILE COLOR
+============================================= */
+
+
+const tileName =
+  document.getElementById(
+    "tileName"
+  );
+
+
+document
+  .querySelectorAll(
+    ".tile-swatch"
+  )
+  .forEach(
+
+    button => {
+
+      button
+        .addEventListener(
+
+          "click",
+
+          () => {
+
+            document
+              .querySelectorAll(
+                ".tile-swatch"
+              )
+              .forEach(
+                item =>
+                  item.classList
+                    .remove(
+                      "active"
+                    )
+              );
+
+
+            button
+              .classList
+              .add(
+                "active"
+              );
+
+
+            setTileColor(
+              button.dataset.color
+            );
+
+
+            tileName
+              .textContent =
+              button.dataset.name;
+
+          }
+
+        );
+
+    }
+
+  );
+
+
+
+/* =============================================
+   RESPONSIVE
+============================================= */
+
+
+window
+  .addEventListener(
+
+    "resize",
+
+    () => {
+
+      camera.aspect =
+        window.innerWidth /
+        window.innerHeight;
+
+
+      camera
+        .updateProjectionMatrix();
+
+
+      renderer
+        .setSize(
+
+          window.innerWidth,
+
+          window.innerHeight
+
+        );
+
+    }
+
+  );
+
+
+
+/* =============================================
+   RENDER LOOP
+============================================= */
+
+
+function animate() {
+
+  requestAnimationFrame(
+    animate
+  );
+
+
+  renderer.render(
+    scene,
+    camera
+  );
+
+}
+
+
+animate();
 
 </script>
 
