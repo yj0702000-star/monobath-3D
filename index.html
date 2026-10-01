@@ -181,6 +181,63 @@
         font-size: 9px;
       }
     }
+
+    /* TILE SELECTOR */
+.tile-divider {
+  width: 100%;
+  height: 1px;
+  background: #E1DED8;
+  margin: 14px 0 12px;
+}
+
+.tile-swatches {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.tile-swatch {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  border: 1px solid #C9C6C0;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tile-swatch:hover {
+  transform: scale(1.08);
+}
+
+.tile-swatch.active {
+  box-shadow:
+    0 0 0 2px #F7F6F3,
+    0 0 0 3px #2E2E2E;
+}
+
+.tile-white {
+  background: #EDEBE6;
+}
+
+.tile-ivory {
+  background: #D8D0C2;
+}
+
+.tile-grey {
+  background: #AAA9A5;
+}
+
+.tile-charcoal {
+  background: #4A4946;
+}
+
+.tile-name {
+  margin-top: 9px;
+  font-size: 11px;
+  color: #777;
+}
   </style>
 </head>
 
@@ -260,10 +317,52 @@
       </div>
 
       <div class="color-name" id="colorName">
-        Frozen White
-      </div>
+  Frozen White
+</div>
 
-    </div>
+<div class="tile-divider"></div>
+
+<div class="control-title">
+  TILE
+</div>
+
+<div class="tile-swatches">
+
+  <button
+    class="tile-swatch tile-white active"
+    data-tile="white"
+    data-name="White Tile"
+    aria-label="White Tile">
+  </button>
+
+  <button
+    class="tile-swatch tile-ivory"
+    data-tile="ivory"
+    data-name="Ivory Tile"
+    aria-label="Ivory Tile">
+  </button>
+
+  <button
+    class="tile-swatch tile-grey"
+    data-tile="grey"
+    data-name="Grey Tile"
+    aria-label="Grey Tile">
+  </button>
+
+  <button
+    class="tile-swatch tile-charcoal"
+    data-tile="charcoal"
+    data-name="Charcoal Tile"
+    aria-label="Charcoal Tile">
+  </button>
+
+</div>
+
+<div class="tile-name" id="tileName">
+  White Tile
+</div>
+
+</div>
 
 
     <div class="guide">
@@ -356,6 +455,67 @@
       });
 
     });
+
+    /* TILE BACKGROUND CONTROL */
+const tileButtons = document.querySelectorAll('.tile-swatch');
+const tileName = document.getElementById('tileName');
+const viewerArea = document.querySelector('.viewer');
+
+const tileBackgrounds = {
+  white: {
+    name: 'White Tile',
+    base: '#E7E4DE',
+    line: '#D1CDC5'
+  },
+  ivory: {
+    name: 'Ivory Tile',
+    base: '#D8D0C2',
+    line: '#C0B7A8'
+  },
+  grey: {
+    name: 'Grey Tile',
+    base: '#AAA9A5',
+    line: '#92918D'
+  },
+  charcoal: {
+    name: 'Charcoal Tile',
+    base: '#4A4946',
+    line: '#5E5C58'
+  }
+};
+
+function applyTile(tileKey) {
+  const tile = tileBackgrounds[tileKey];
+  if (!tile) return;
+
+  viewerArea.style.backgroundColor = tile.base;
+
+  viewerArea.style.backgroundImage = `
+    linear-gradient(to right, ${tile.line} 1px, transparent 1px),
+    linear-gradient(to bottom, ${tile.line} 1px, transparent 1px)
+  `;
+
+  viewerArea.style.backgroundSize = '520px 320px';
+
+  tileName.textContent = tile.name;
+}
+
+tileButtons.forEach(button => {
+  button.addEventListener('click', () => {
+
+    const selectedTile = button.getAttribute('data-tile');
+
+    tileButtons.forEach(item => {
+      item.classList.remove('active');
+    });
+
+    button.classList.add('active');
+
+    applyTile(selectedTile);
+  });
+});
+
+applyTile('white');
   </script>
 
 </body>
