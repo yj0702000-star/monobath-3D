@@ -41,6 +41,7 @@
       --progress-bar-color: #2E2E2E;
     }
 
+    /* MONOBATH / MONO 600 */
     .label {
       position: absolute;
       top: 28px;
@@ -64,6 +65,91 @@
       color: #2E2E2E;
     }
 
+    /* 색상 선택 영역 */
+    .controls {
+      position: absolute;
+      right: 34px;
+      bottom: 34px;
+      z-index: 20;
+
+      padding: 18px 20px 16px;
+
+      background: rgba(247, 246, 243, 0.90);
+      backdrop-filter: blur(10px);
+
+      border: 1px solid rgba(46, 46, 46, 0.10);
+      border-radius: 4px;
+    }
+
+    .control-title {
+      margin-bottom: 14px;
+
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      color: #2E2E2E;
+    }
+
+    .swatches {
+      display: flex;
+      gap: 12px;
+    }
+
+    .swatch {
+      width: 26px;
+      height: 26px;
+
+      padding: 0;
+      border-radius: 50%;
+
+      border: 1px solid rgba(46, 46, 46, 0.18);
+      cursor: pointer;
+
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .swatch:hover {
+      transform: scale(1.08);
+    }
+
+    .swatch.active {
+      box-shadow:
+        0 0 0 2px #F7F6F3,
+        0 0 0 3px #2E2E2E;
+    }
+
+    /* Frozen White - 우선 기본색 */
+    .frozen {
+      background: #EDEDEA;
+    }
+
+    /* Pure White */
+    .pure {
+      background: #FAFAF8;
+    }
+
+    /* Sand Beige */
+    .sand {
+      background: #D8CDBA;
+    }
+
+    /* Urban Grey */
+    .urban {
+      background: #8E8E89;
+    }
+
+    .color-name {
+      margin-top: 12px;
+
+      min-width: 120px;
+
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: #777;
+    }
+
     .guide {
       position: absolute;
       bottom: 25px;
@@ -78,6 +164,23 @@
       pointer-events: none;
       white-space: nowrap;
     }
+
+    @media (max-width: 700px) {
+      .label {
+        top: 20px;
+        left: 20px;
+      }
+
+      .controls {
+        right: 20px;
+        bottom: 55px;
+      }
+
+      .guide {
+        bottom: 18px;
+        font-size: 9px;
+      }
+    }
   </style>
 </head>
 
@@ -91,6 +194,8 @@
     </div>
 
     <model-viewer
+      id="monoViewer"
+
       src="./MONOBATH_MONO600.glb"
 
       alt="MONOBATH MONO 600 seamless basin"
@@ -113,14 +218,145 @@
       max-field-of-view="45deg"
 
       environment-image="neutral">
-
     </model-viewer>
+
+
+    <div class="controls">
+
+      <div class="control-title">
+        BASIN COLOR
+      </div>
+
+      <div class="swatches">
+
+        <button
+          class="swatch frozen active"
+          data-color="#EDEDEA"
+          data-name="Frozen White"
+          aria-label="Frozen White">
+        </button>
+
+        <button
+          class="swatch pure"
+          data-color="#FAFAF8"
+          data-name="Pure White"
+          aria-label="Pure White">
+        </button>
+
+        <button
+          class="swatch sand"
+          data-color="#D8CDBA"
+          data-name="Sand Beige"
+          aria-label="Sand Beige">
+        </button>
+
+        <button
+          class="swatch urban"
+          data-color="#8E8E89"
+          data-name="Urban Grey"
+          aria-label="Urban Grey">
+        </button>
+
+      </div>
+
+      <div class="color-name" id="colorName">
+        Frozen White
+      </div>
+
+    </div>
+
 
     <div class="guide">
       DRAG TO EXPLORE · SCROLL TO ZOOM
     </div>
 
   </div>
+
+
+  <script>
+    const viewer = document.querySelector('#monoViewer');
+    const buttons = document.querySelectorAll('.swatch');
+    const colorName = document.querySelector('#colorName');
+
+    function hexToRGBA(hex) {
+      const cleanHex = hex.replace('#', '');
+
+      const r = parseInt(cleanHex.substring(0, 2), 16) / 255;
+      const g = parseInt(cleanHex.substring(2, 4), 16) / 255;
+      const b = parseInt(cleanHex.substring(4, 6), 16) / 255;
+
+      return [r, g, b, 1];
+    }
+
+    viewer.addEventListener('load', () => {
+
+      const materials = viewer.model.materials;
+
+      console.log(
+        'MONOBATH materials:',
+        materials.map(material => material.name)
+      );
+
+      /*
+        Blender GLB에서 확인한 재질:
+        - _Metal_Corrugated_Shiny_1 = 수전 계열
+        - FrontColor = 세면대 본체
+
+        따라서 FrontColor만 변경한다.
+      */
+
+      const basinMaterial = materials.find(
+        material => material.name === 'FrontColor'
+      );
+
+      if (!basinMaterial) {
+        console.error('FrontColor material not found.');
+        return;
+      }
+
+      /* MMA 솔리드서피스 느낌 */
+      basinMaterial.pbrMetallicRoughness.setMetallicFactor(0.0);
+      basinMaterial.pbrMetallicRoughness.setRoughnessFactor(0.72);
+
+
+      buttons.forEach(button => {
+
+        button.addEventListener('click', () => {
+
+          const selectedColor =
+            button.getAttribute('data-color');
+
+          const selectedName =
+            button.getAttribute('data-name');
+
+          basinMaterial
+            .pbrMetallicRoughness
+            .setBaseColorFactor(
+              hexToRGBA(selectedColor)
+            );
+
+          basinMaterial
+            .pbrMetallicRoughness
+            .setMetallicFactor(0.0);
+
+          basinMaterial
+            .pbrMetallicRoughness
+            .setRoughnessFactor(0.72);
+
+
+          buttons.forEach(item =>
+            item.classList.remove('active')
+          );
+
+          button.classList.add('active');
+
+          colorName.textContent = selectedName;
+        });
+
+      });
+
+    });
+  </script>
 
 </body>
 </html>
