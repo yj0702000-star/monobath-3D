@@ -3,9 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+        content="width=device-width, initial-scale=1.0">
 
   <title>MONOBATH Virtual View</title>
+
+  <!-- Pannellum -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js">
+  </script>
 
   <style>
     * {
@@ -14,8 +22,7 @@
       padding: 0;
     }
 
-    html,
-    body {
+    html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
@@ -23,52 +30,28 @@
       font-family: Arial, sans-serif;
     }
 
-    #viewer {
-      position: relative;
+    #panorama {
       width: 100vw;
       height: 100vh;
-      overflow: hidden;
-      cursor: grab;
-      user-select: none;
-      touch-action: none;
-      background: #F7F6F3;
     }
 
-    #viewer.dragging {
-      cursor: grabbing;
-    }
-
-    #panorama {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-
-      height: 100%;
-      width: auto;
-
-      max-width: none;
-      max-height: none;
-
-      transform: translate(-50%, -50%);
-      transform-origin: center center;
-
-      pointer-events: none;
-      user-select: none;
-      -webkit-user-drag: none;
+    /* 기본 Pannellum 컨트롤 숨김 */
+    .pnlm-controls-container {
+      display: none !important;
     }
 
     .brand {
-      position: absolute;
+      position: fixed;
       top: 28px;
       left: 32px;
-      z-index: 10;
+      z-index: 100;
       pointer-events: none;
     }
 
     .brand-small {
       font-size: 10px;
       letter-spacing: 0.22em;
-      color: #A49E94;
+      color: rgba(255,255,255,0.75);
       margin-bottom: 7px;
     }
 
@@ -76,69 +59,33 @@
       font-size: 15px;
       font-weight: 600;
       letter-spacing: 0.05em;
-      color: #2E2E2E;
+      color: #FFFFFF;
     }
 
     .guide {
-      position: absolute;
+      position: fixed;
       left: 50%;
-      bottom: 26px;
+      bottom: 27px;
       transform: translateX(-50%);
-      z-index: 10;
+      z-index: 100;
 
       font-size: 10px;
       letter-spacing: 0.18em;
-      color: rgba(46, 46, 46, 0.52);
+      color: rgba(255,255,255,0.75);
 
-      white-space: nowrap;
       pointer-events: none;
-    }
-
-    .close {
-      position: absolute;
-      top: 24px;
-      right: 28px;
-      z-index: 20;
-
-      width: 42px;
-      height: 42px;
-
-      border: 1px solid rgba(46,46,46,0.18);
-      border-radius: 50%;
-
-      background: rgba(247,246,243,0.82);
-      backdrop-filter: blur(8px);
-
-      color: #2E2E2E;
-      font-size: 23px;
-      font-weight: 300;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      cursor: pointer;
+      white-space: nowrap;
     }
 
     @media (max-width: 768px) {
-
       .brand {
         top: 20px;
         left: 20px;
       }
 
-      .close {
-        top: 16px;
-        right: 16px;
-      }
-
       .guide {
         bottom: 20px;
         font-size: 9px;
-      }
-
-      #panorama {
-        height: 100%;
       }
     }
   </style>
@@ -146,159 +93,68 @@
 
 <body>
 
-  <div id="viewer">
+  <div id="panorama"></div>
 
-    <img
-      id="panorama"
-      src="./MONOBATH_PANORAMA.png"
-      alt="MONOBATH panoramic bathroom">
-
-    <div class="brand">
-      <div class="brand-small">MONOBATH</div>
-      <div class="brand-title">VIRTUAL VIEW</div>
-    </div>
-
-    <button class="close"
-            onclick="closeViewer()"
-            aria-label="Close">
-      ×
-    </button>
-
-    <div class="guide">
-      DRAG TO EXPLORE
-    </div>
-
+  <div class="brand">
+    <div class="brand-small">MONOBATH</div>
+    <div class="brand-title">VIRTUAL VIEW</div>
   </div>
 
+  <div class="guide">
+    DRAG TO EXPLORE
+  </div>
 
   <script>
 
-    const viewer = document.getElementById('viewer');
-    const panorama = document.getElementById('panorama');
+    pannellum.viewer('panorama', {
 
-    let dragging = false;
+      type: 'equirectangular',
 
-    let startX = 0;
-    let startY = 0;
+      panorama: './MONOBATH_PANORAMA_360.png',
 
-    let currentX = 0;
-    let currentY = 0;
+      autoLoad: true,
 
-    let startOffsetX = 0;
-    let startOffsetY = 0;
+      autoRotate: 0,
 
-    const verticalLimit = 35;
+      showControls: false,
 
+      mouseZoom: true,
 
-    function getHorizontalLimit() {
+      draggable: true,
 
-      const imageWidth = panorama.offsetWidth;
-      const viewerWidth = viewer.offsetWidth;
+      keyboardZoom: false,
 
-      return Math.max(
-        0,
-        (imageWidth - viewerWidth) / 2
-      );
-    }
+      compass: false,
 
+      /*
+       * 시작 시점
+       */
+      yaw: 0,
+      pitch: 0,
+      hfov: 82,
 
-    function updatePosition() {
+      /*
+       * 좌우 회전 제한
+       * 뒤쪽까지 돌아가지 않도록 제한
+       */
+      minYaw: -85,
+      maxYaw: 85,
 
-      const horizontalLimit = getHorizontalLimit();
+      /*
+       * 위아래 제한
+       */
+      minPitch: -25,
+      maxPitch: 35,
 
-      currentX = Math.max(
-        -horizontalLimit,
-        Math.min(horizontalLimit, currentX)
-      );
+      /*
+       * 줌 제한
+       */
+      minHfov: 55,
+      maxHfov: 95,
 
-      currentY = Math.max(
-        -verticalLimit,
-        Math.min(verticalLimit, currentY)
-      );
+      friction: 0.18
 
-      panorama.style.transform =
-        `translate(calc(-50% + ${currentX}px),
-                   calc(-50% + ${currentY}px))`;
-    }
-
-
-    viewer.addEventListener('pointerdown', (event) => {
-
-      dragging = true;
-
-      viewer.classList.add('dragging');
-
-      startX = event.clientX;
-      startY = event.clientY;
-
-      startOffsetX = currentX;
-      startOffsetY = currentY;
-
-      viewer.setPointerCapture(event.pointerId);
     });
-
-
-    viewer.addEventListener('pointermove', (event) => {
-
-      if (!dragging) return;
-
-      const deltaX = event.clientX - startX;
-      const deltaY = event.clientY - startY;
-
-      currentX = startOffsetX + deltaX;
-      currentY = startOffsetY + deltaY * 0.25;
-
-      updatePosition();
-    });
-
-
-    viewer.addEventListener('pointerup', (event) => {
-
-      dragging = false;
-
-      viewer.classList.remove('dragging');
-
-      try {
-        viewer.releasePointerCapture(event.pointerId);
-      } catch (e) {}
-    });
-
-
-    viewer.addEventListener('pointercancel', () => {
-
-      dragging = false;
-
-      viewer.classList.remove('dragging');
-    });
-
-
-    panorama.addEventListener('load', () => {
-
-      currentX = 0;
-      currentY = 0;
-
-      updatePosition();
-    });
-
-
-    window.addEventListener('resize', updatePosition);
-
-
-    function closeViewer() {
-
-      if (window.parent !== window) {
-
-        window.parent.postMessage(
-          'MONOBATH_CLOSE_VIEWER',
-          '*'
-        );
-
-      } else {
-
-        window.history.back();
-
-      }
-    }
 
   </script>
 
