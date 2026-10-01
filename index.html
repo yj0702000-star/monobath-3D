@@ -24,7 +24,7 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #C9C0B4;
+    background: #B7ADA0;
     font-family:
       Arial,
       Helvetica,
@@ -39,7 +39,7 @@
     position: fixed;
     inset: 0;
     overflow: hidden;
-    background: #C9C0B4;
+    background: #B7ADA0;
   }
 
   canvas {
@@ -47,6 +47,7 @@
     width: 100%;
     height: 100%;
     touch-action: none;
+    filter: contrast(1.14) saturate(1.04) brightness(0.98);
   }
 
 
@@ -669,7 +670,7 @@ const scene =
   new THREE.Scene();
 
 scene.background =
-  new THREE.Color("#C9C0B4");
+  new THREE.Color("#B7ADA0");
 
 
 /* =====================================================
@@ -725,10 +726,10 @@ renderer.outputColorSpace =
   THREE.SRGBColorSpace;
 
 renderer.toneMapping =
-  THREE.ACESFilmicToneMapping;
+  THREE.NeutralToneMapping;
 
 renderer.toneMappingExposure =
-  0.70;
+  0.92;
 
 renderer.shadowMap.enabled =
   true;
@@ -812,8 +813,8 @@ new RGBELoader().load(
 */
 const keyLight =
   new THREE.DirectionalLight(
-    0xFFF2E2,
-    1.70
+    0xFFF0DC,
+    2.05
   );
 
 keyLight.position.set(
@@ -844,7 +845,7 @@ scene.add(
 const fillLight =
   new THREE.DirectionalLight(
     0xDDE4E8,
-    0.18
+    0.08
   );
 
 fillLight.position.set(
@@ -864,8 +865,8 @@ scene.add(
 const hemiLight =
   new THREE.HemisphereLight(
     0xFFFFFF,
-    0x8F887E,
-    0.20
+    0x6F685F,
+    0.08
   );
 
 scene.add(
@@ -956,7 +957,7 @@ function makeTileTexture(
   */
 
   ctx.strokeStyle =
-    "rgba(75,75,75,.18)";
+    "rgba(70,66,60,.28)";
 
   ctx.lineWidth =
     2;
@@ -1021,6 +1022,16 @@ function makeTileTexture(
     renderer.capabilities
       .getMaxAnisotropy();
 
+  texture.minFilter =
+    THREE.LinearMipmapLinearFilter;
+
+  texture.magFilter =
+    THREE.LinearFilter;
+
+  texture.generateMipmaps = true;
+
+  texture.needsUpdate = true;
+
   return texture;
 
 }
@@ -1037,9 +1048,9 @@ const wallMaterial =
 
     metalness: 0,
 
-    roughness: 0.84,
+    roughness: 0.90,
 
-    envMapIntensity: 0.22
+    envMapIntensity: 0.10
 
   });
 
@@ -1051,9 +1062,9 @@ const floorMaterial =
 
     metalness: 0,
 
-    roughness: 0.80,
+    roughness: 0.86,
 
-    envMapIntensity: 0.26
+    envMapIntensity: 0.14
 
   });
 
@@ -1180,7 +1191,7 @@ function setTileColor(
 
 
 setTileColor(
-  "#BEB3A5"
+  "#B1A596"
 );
 
 
@@ -1203,25 +1214,25 @@ const basinMaterial =
        반무광 MMA
     */
     roughness:
-      0.30,
+      0.25,
 
     ior:
       1.48,
 
     specularIntensity:
-      0.68,
+      0.82,
 
     envMapIntensity:
-      1.05,
+      0.82,
 
     /*
        아주 약한 표면 코팅 느낌
     */
     clearcoat:
-      0.035,
+      0.02,
 
     clearcoatRoughness:
-      0.38
+      0.30
 
   });
 
@@ -1242,10 +1253,10 @@ const faucetMaterial =
       1,
 
     roughness:
-      0.10,
+      0.08,
 
     envMapIntensity:
-      1.75,
+      1.45,
 
     clearcoat:
       0.03,
@@ -1673,7 +1684,7 @@ renderer.domElement.addEventListener(
     */
 
     targetYaw +=
-  dx * 0.0075;
+      dx * 0.0075;
 
 targetYaw =
   THREE.MathUtils.clamp(
@@ -1701,7 +1712,7 @@ targetYaw =
     */
 
     targetPitch +=
-      -dy * 0.006;
+      dy * 0.006;
 
 
     targetPitch =
@@ -2032,22 +2043,13 @@ function animate() {
        부드러운 보간
     */
     currentYaw +=
-  (
-    targetYaw -
-    currentYaw
-  ) * 0.095;
+      (targetYaw - currentYaw) * 0.095;
 
-currentPitch +=
-  (
-    targetPitch -
-    currentPitch
-  ) * 0.085;
+    currentPitch +=
+      (targetPitch - currentPitch) * 0.085;
 
-currentZoom +=
-  (
-    targetZoom -
-    currentZoom
-  ) * 0.08;
+    currentZoom +=
+      (targetZoom - currentZoom) * 0.08;
 
     /*
        카메라는 고정.
