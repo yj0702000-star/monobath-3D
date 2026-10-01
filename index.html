@@ -1281,13 +1281,13 @@ const basinStyles = {
     name: "FROZEN WHITE",
     base: "#F0F1EF",
     roughness: 0.27,
-    bumpScale: 0.0012,
+    bumpScale: 0.0020,
     seed: 29,
     chipSets: [
-      { color: "#BFC3C1", count: 820, minR: 0.35, maxR: 1.15, minA: 0.16, maxA: 0.34, bump: 142 },
-      { color: "#AEB3B0", count: 300, minR: 0.45, maxR: 1.55, minA: 0.14, maxA: 0.28, bump: 148 },
-      { color: "#FFFFFF", count: 260, minR: 0.30, maxR: 1.20, minA: 0.18, maxA: 0.34, bump: 136 },
-      { color: "#D4D6D3", count: 90,  minR: 1.20, maxR: 2.50, minA: 0.12, maxA: 0.22, bump: 145 }
+      { color: "#BFC3C1", count: 1800, minR: 0.90, maxR: 2.25, minA: 0.30, maxA: 0.55, bump: 145 },
+      { color: "#AEB3B0", count: 620,  minR: 1.10, maxR: 3.10, minA: 0.25, maxA: 0.48, bump: 151 },
+      { color: "#FFFFFF", count: 480,  minR: 0.70, maxR: 2.10, minA: 0.22, maxA: 0.42, bump: 138 },
+      { color: "#D4D6D3", count: 150,  minR: 2.20, maxR: 5.20, minA: 0.20, maxA: 0.36, bump: 148 }
     ]
   },
 
@@ -1295,13 +1295,13 @@ const basinStyles = {
     name: "SAND BEIGE",
     base: "#D7C9AF",
     roughness: 0.29,
-    bumpScale: 0.0015,
+    bumpScale: 0.0024,
     seed: 47,
     chipSets: [
-      { color: "#B5A487", count: 620, minR: 0.40, maxR: 1.35, minA: 0.22, maxA: 0.45, bump: 146 },
-      { color: "#EEE2CB", count: 470, minR: 0.35, maxR: 1.30, minA: 0.20, maxA: 0.40, bump: 136 },
-      { color: "#9E896D", count: 210, minR: 0.45, maxR: 1.65, minA: 0.18, maxA: 0.34, bump: 151 },
-      { color: "#F4EBDD", count: 80,  minR: 1.20, maxR: 2.80, minA: 0.14, maxA: 0.25, bump: 138 }
+      { color: "#B5A487", count: 1450, minR: 0.95, maxR: 2.60, minA: 0.34, maxA: 0.62, bump: 149 },
+      { color: "#EEE2CB", count: 980,  minR: 0.75, maxR: 2.35, minA: 0.30, maxA: 0.55, bump: 138 },
+      { color: "#9E896D", count: 460,  minR: 1.10, maxR: 3.40, minA: 0.28, maxA: 0.52, bump: 154 },
+      { color: "#F4EBDD", count: 140,  minR: 2.40, maxR: 5.50, minA: 0.20, maxA: 0.38, bump: 140 }
     ]
   },
 
@@ -1309,13 +1309,13 @@ const basinStyles = {
     name: "URBAN GREY",
     base: "#92918E",
     roughness: 0.31,
-    bumpScale: 0.0017,
+    bumpScale: 0.0026,
     seed: 71,
     chipSets: [
-      { color: "#5E605E", count: 660, minR: 0.38, maxR: 1.30, minA: 0.22, maxA: 0.46, bump: 151 },
-      { color: "#B5B5B1", count: 430, minR: 0.35, maxR: 1.25, minA: 0.20, maxA: 0.40, bump: 137 },
-      { color: "#414341", count: 220, minR: 0.45, maxR: 1.70, minA: 0.18, maxA: 0.36, bump: 155 },
-      { color: "#D0CFCA", count: 70,  minR: 1.20, maxR: 2.65, minA: 0.12, maxA: 0.24, bump: 136 }
+      { color: "#5E605E", count: 1500, minR: 0.95, maxR: 2.65, minA: 0.36, maxA: 0.66, bump: 154 },
+      { color: "#B5B5B1", count: 980,  minR: 0.75, maxR: 2.30, minA: 0.28, maxA: 0.54, bump: 138 },
+      { color: "#414341", count: 520,  minR: 1.10, maxR: 3.60, minA: 0.32, maxA: 0.60, bump: 158 },
+      { color: "#D0CFCA", count: 150,  minR: 2.35, maxR: 5.25, minA: 0.20, maxA: 0.40, bump: 138 }
     ]
   }
 
@@ -1434,7 +1434,9 @@ function createSolidSurfaceTextures(style) {
   [map, bumpMap].forEach(texture => {
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(3, 3);
+    /* SketchUp GLB UVs span a very large range.
+       A small repeat value keeps chips at real visible scale. */
+    texture.repeat.set(0.035, 0.035);
     texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
     texture.minFilter = THREE.LinearMipmapLinearFilter;
     texture.magFilter = THREE.LinearFilter;
@@ -1500,7 +1502,7 @@ document.querySelectorAll(".basin-swatch").forEach(button => {
 
   if (preview && preview.startsWith("data:")) {
     button.style.backgroundImage = `url(${preview})`;
-    button.style.backgroundSize = "cover";
+    button.style.backgroundSize = "135% 135%";
     button.style.backgroundPosition = "center";
   }
   else {
