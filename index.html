@@ -24,7 +24,7 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #F4F2ED;
+    background: #C9C0B4;
     font-family:
       Arial,
       Helvetica,
@@ -39,7 +39,7 @@
     position: fixed;
     inset: 0;
     overflow: hidden;
-    background: #F4F2ED;
+    background: #C9C0B4;
   }
 
   canvas {
@@ -594,9 +594,9 @@
 
       <button
         class="swatch tile-swatch active"
-        data-color="#D7D0C5"
+        data-color="#BEB3A5"
         data-name="IVORY"
-        style="background:#D7D0C5">
+        style="background:#BEB3A5">
       </button>
 
       <button
@@ -669,7 +669,7 @@ const scene =
   new THREE.Scene();
 
 scene.background =
-  new THREE.Color("#F4F2ED");
+  new THREE.Color("#C9C0B4");
 
 
 /* =====================================================
@@ -728,7 +728,7 @@ renderer.toneMapping =
   THREE.ACESFilmicToneMapping;
 
 renderer.toneMappingExposure =
-  1.08;
+  0.70;
 
 renderer.shadowMap.enabled =
   true;
@@ -812,8 +812,8 @@ new RGBELoader().load(
 */
 const keyLight =
   new THREE.DirectionalLight(
-    0xFFF8EF,
-    2.35
+    0xFFF2E2,
+    1.70
   );
 
 keyLight.position.set(
@@ -843,8 +843,8 @@ scene.add(
 */
 const fillLight =
   new THREE.DirectionalLight(
-    0xE6EBEE,
-    0.55
+    0xDDE4E8,
+    0.18
   );
 
 fillLight.position.set(
@@ -864,8 +864,8 @@ scene.add(
 const hemiLight =
   new THREE.HemisphereLight(
     0xFFFFFF,
-    0xB8B4AC,
-    0.48
+    0x8F887E,
+    0.20
   );
 
 scene.add(
@@ -1037,9 +1037,9 @@ const wallMaterial =
 
     metalness: 0,
 
-    roughness: 0.73,
+    roughness: 0.84,
 
-    envMapIntensity: 0.45
+    envMapIntensity: 0.22
 
   });
 
@@ -1051,9 +1051,9 @@ const floorMaterial =
 
     metalness: 0,
 
-    roughness: 0.68,
+    roughness: 0.80,
 
-    envMapIntensity: 0.52
+    envMapIntensity: 0.26
 
   });
 
@@ -1180,7 +1180,7 @@ function setTileColor(
 
 
 setTileColor(
-  "#D7D0C5"
+  "#BEB3A5"
 );
 
 
@@ -1203,16 +1203,16 @@ const basinMaterial =
        반무광 MMA
     */
     roughness:
-      0.28,
+      0.30,
 
     ior:
       1.48,
 
     specularIntensity:
-      0.58,
+      0.68,
 
     envMapIntensity:
-      1.18,
+      1.05,
 
     /*
        아주 약한 표면 코팅 느낌
@@ -1997,100 +1997,60 @@ window.addEventListener(
 
 function animate() {
 
-  requestAnimationFrame(
-    animate
-  );
+  requestAnimationFrame(animate);
 
-
-  if (
-  !dragging &&
-  Math.abs(yawVelocity) > 0.00005
-) {
-
-  targetYaw +=
-    yawVelocity;
-
-  targetYaw =
-    THREE.MathUtils.clamp(
-      targetYaw,
-      minYaw,
-      maxYaw
-    );
-
-  /*
-     끝에 닿으면
-     관성도 정지
-  */
-
-  if (
-    targetYaw <= minYaw ||
-    targetYaw >= maxYaw
-  ) {
-    yawVelocity = 0;
-  }
-  else {
-    yawVelocity *= 0.91;
-  }
-
-}
-
+  if (product) {
 
     /*
-       부드럽게 목표값으로
+       손을 놓았을 때 아주 약한 관성.
+       좌우 제한에 닿으면 즉시 멈춤.
     */
+    if (
+      !dragging &&
+      Math.abs(yawVelocity) > 0.00005
+    ) {
 
+      targetYaw += yawVelocity;
+
+      targetYaw = THREE.MathUtils.clamp(
+        targetYaw,
+        minYaw,
+        maxYaw
+      );
+
+      if (
+        targetYaw <= minYaw ||
+        targetYaw >= maxYaw
+      ) {
+        yawVelocity = 0;
+      } else {
+        yawVelocity *= 0.91;
+      }
+    }
+
+    /*
+       부드러운 보간
+    */
     currentYaw +=
-      (
-        targetYaw -
-        currentYaw
-      ) * 0.16;
-
+      (targetYaw - currentYaw) * 0.16;
 
     currentPitch +=
-      (
-        targetPitch -
-        currentPitch
-      ) * 0.16;
-
+      (targetPitch - currentPitch) * 0.16;
 
     currentZoom +=
-      (
-        targetZoom -
-        currentZoom
-      ) * 0.12;
-
+      (targetZoom - currentZoom) * 0.12;
 
     /*
-       ★ 여기서 오직 제품만 변함
+       카메라는 고정.
+       제품 피벗만 회전 / 기울기 / 확대.
     */
-
-    productPivot.rotation.y =
-      currentYaw;
-
-
-    productPivot.rotation.x =
-      currentPitch;
-
-
-    productPivot.scale.setScalar(
-      currentZoom
-    );
-
+    productPivot.rotation.y = currentYaw;
+    productPivot.rotation.x = currentPitch;
+    productPivot.scale.setScalar(currentZoom);
   }
 
-
-  /*
-     CAMERA는 여기서
-     단 한 번도 변경하지 않음.
-  */
-
-  renderer.render(
-    scene,
-    camera
-  );
-
+  renderer.render(scene, camera);
 }
-
 
 animate();
 
