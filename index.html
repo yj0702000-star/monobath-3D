@@ -2,27 +2,25 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+
   <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
+        content="width=device-width,
+                 initial-scale=1.0,
+                 maximum-scale=1.0,
+                 user-scalable=no">
 
   <title>MONOBATH Virtual View</title>
 
-  <!-- Pannellum -->
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
-
-  <script
-    src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js">
-  </script>
-
   <style>
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
-    html, body {
+    html,
+    body {
       width: 100%;
       height: 100%;
       overflow: hidden;
@@ -30,54 +28,152 @@
       font-family: Arial, sans-serif;
     }
 
-    #panorama {
+    /* =========================
+       VIEWER
+    ========================= */
+
+    #viewer {
+      position: relative;
       width: 100vw;
       height: 100vh;
+      overflow: hidden;
+
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+
+      background: #F7F6F3;
     }
 
-    /* 기본 Pannellum 컨트롤 숨김 */
-    .pnlm-controls-container {
-      display: none !important;
+    #viewer.dragging {
+      cursor: grabbing;
     }
+
+    /* =========================
+       PANORAMA IMAGE
+    ========================= */
+
+    #scene {
+      position: absolute;
+
+      height: 100%;
+      width: auto;
+
+      max-width: none;
+
+      top: 50%;
+      left: 50%;
+
+      transform: translate(-50%, -50%);
+
+      pointer-events: none;
+      user-select: none;
+
+      -webkit-user-drag: none;
+
+      will-change: transform;
+    }
+
+    /* =========================
+       DARK EDGE GRADIENT
+    ========================= */
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+
+      pointer-events: none;
+      z-index: 20;
+
+      background:
+        linear-gradient(
+          90deg,
+          rgba(0,0,0,0.12) 0%,
+          rgba(0,0,0,0.00) 18%,
+          rgba(0,0,0,0.00) 82%,
+          rgba(0,0,0,0.08) 100%
+        );
+    }
+
+    /* =========================
+       BRAND
+    ========================= */
 
     .brand {
       position: fixed;
+
       top: 28px;
       left: 32px;
+
       z-index: 100;
+
       pointer-events: none;
     }
 
     .brand-small {
       font-size: 10px;
+
       letter-spacing: 0.22em;
-      color: rgba(255,255,255,0.75);
+
+      color: rgba(255,255,255,0.78);
+
       margin-bottom: 7px;
+
+      text-shadow: 0 1px 5px rgba(0,0,0,0.18);
     }
 
     .brand-title {
       font-size: 15px;
+
       font-weight: 600;
+
       letter-spacing: 0.05em;
+
       color: #FFFFFF;
+
+      text-shadow: 0 1px 5px rgba(0,0,0,0.18);
     }
+
+    /* =========================
+       GUIDE
+    ========================= */
 
     .guide {
       position: fixed;
+
       left: 50%;
       bottom: 27px;
+
       transform: translateX(-50%);
+
       z-index: 100;
 
       font-size: 10px;
+
       letter-spacing: 0.18em;
-      color: rgba(255,255,255,0.75);
+
+      color: rgba(255,255,255,0.82);
 
       pointer-events: none;
+
       white-space: nowrap;
+
+      text-shadow: 0 1px 5px rgba(0,0,0,0.22);
+
+      transition:
+        opacity 0.5s ease;
     }
 
+    .guide.hide {
+      opacity: 0;
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
     @media (max-width: 768px) {
+
       .brand {
         top: 20px;
         left: 20px;
@@ -87,74 +183,265 @@
         bottom: 20px;
         font-size: 9px;
       }
+
     }
+
   </style>
 </head>
 
 <body>
 
-  <div id="panorama"></div>
+  <div id="viewer">
+
+    <img
+      id="scene"
+      src="./MONOBATH_PANORAMA_180_FINAL_8K.png"
+      alt="MONOBATH Virtual View"
+      draggable="false"
+    >
+
+  </div>
+
+  <div class="overlay"></div>
 
   <div class="brand">
-    <div class="brand-small">MONOBATH</div>
-    <div class="brand-title">VIRTUAL VIEW</div>
+
+    <div class="brand-small">
+      MONOBATH
+    </div>
+
+    <div class="brand-title">
+      VIRTUAL VIEW
+    </div>
+
   </div>
 
-  <div class="guide">
-    DRAG TO EXPLORE
+  <div class="guide" id="guide">
+    ← &nbsp; DRAG TO EXPLORE &nbsp; →
   </div>
+
 
   <script>
 
-    pannellum.viewer('panorama', {
+    const viewer = document.getElementById('viewer');
+    const scene  = document.getElementById('scene');
+    const guide  = document.getElementById('guide');
 
-      type: 'equirectangular',
 
-      panorama: './MONOBATH_PANORAMA_180_FINAL_8K.png',
+    let dragging = false;
 
-      autoLoad: true,
+    let startX = 0;
 
-      autoRotate: 0,
+    let startOffset = 0;
 
-      showControls: false,
+    let offsetX = 0;
 
-      mouseZoom: true,
+    let maxOffset = 0;
 
-      draggable: true,
+    let hasDragged = false;
 
-      keyboardZoom: false,
 
-      compass: false,
+    /* =========================
+       IMAGE POSITION
+    ========================= */
 
-      /*
-       * 시작 시점
-       */
-      yaw: 0,
-      pitch: 0,
-      hfov: 105,
+    function updateBounds() {
 
       /*
-       * 좌우 회전 제한
-       * 뒤쪽까지 돌아가지 않도록 제한
+       * 이미지가 화면 높이에 맞춰진 상태에서
+       * 실제 표시되는 너비 계산
        */
-      minYaw: -70,
-      maxYaw: 70,
+
+      const viewerWidth  = viewer.clientWidth;
+      const viewerHeight = viewer.clientHeight;
+
+      const imageRatio =
+        scene.naturalWidth / scene.naturalHeight;
+
+      const displayedWidth =
+        viewerHeight * imageRatio;
+
 
       /*
-       * 위아래 제한
+       * 좌우로 움직일 수 있는 최대 거리
        */
-      minPitch: -15,
-      maxPitch: 20,
+
+      maxOffset = Math.max(
+        0,
+        (displayedWidth - viewerWidth) / 2
+      );
+
 
       /*
-       * 줌 제한
+       * 화면 밖으로 나가지 않도록 제한
        */
-      minHfov: 55,
-      maxHfov: 115,
 
-      friction: 0.18
+      offsetX = Math.max(
+        -maxOffset,
+        Math.min(maxOffset, offsetX)
+      );
 
-    });
+
+      render();
+
+    }
+
+
+    function render() {
+
+      scene.style.transform =
+        `translate(calc(-50% + ${offsetX}px), -50%)`;
+
+    }
+
+
+    /* =========================
+       POINTER START
+    ========================= */
+
+    viewer.addEventListener(
+      'pointerdown',
+      (e) => {
+
+        dragging = true;
+
+        startX = e.clientX;
+
+        startOffset = offsetX;
+
+        viewer.classList.add('dragging');
+
+        viewer.setPointerCapture(e.pointerId);
+
+      }
+    );
+
+
+    /* =========================
+       POINTER MOVE
+    ========================= */
+
+    viewer.addEventListener(
+      'pointermove',
+      (e) => {
+
+        if (!dragging) return;
+
+
+        const delta =
+          e.clientX - startX;
+
+
+        /*
+         * 마우스를 오른쪽으로 끌면
+         * 사진도 오른쪽으로 이동
+         */
+
+        offsetX =
+          startOffset + delta;
+
+
+        /*
+         * 좌우 범위 제한
+         */
+
+        offsetX = Math.max(
+          -maxOffset,
+          Math.min(maxOffset, offsetX)
+        );
+
+
+        render();
+
+
+        /*
+         * 처음 움직인 뒤
+         * 안내문 천천히 숨기기
+         */
+
+        if (!hasDragged &&
+            Math.abs(delta) > 10) {
+
+          hasDragged = true;
+
+          guide.classList.add('hide');
+
+        }
+
+      }
+    );
+
+
+    /* =========================
+       POINTER END
+    ========================= */
+
+    function endDrag(e) {
+
+      if (!dragging) return;
+
+      dragging = false;
+
+      viewer.classList.remove('dragging');
+
+      try {
+        viewer.releasePointerCapture(
+          e.pointerId
+        );
+      }
+      catch (error) {}
+
+    }
+
+
+    viewer.addEventListener(
+      'pointerup',
+      endDrag
+    );
+
+
+    viewer.addEventListener(
+      'pointercancel',
+      endDrag
+    );
+
+
+    /* =========================
+       LOAD
+    ========================= */
+
+    scene.addEventListener(
+      'load',
+      () => {
+
+        offsetX = 0;
+
+        updateBounds();
+
+      }
+    );
+
+
+    /* =========================
+       RESIZE
+    ========================= */
+
+    window.addEventListener(
+      'resize',
+      updateBounds
+    );
+
+
+    /*
+     * 캐시 때문에 load 이벤트가
+     * 이미 끝난 경우
+     */
+
+    if (scene.complete) {
+
+      updateBounds();
+
+    }
 
   </script>
 
