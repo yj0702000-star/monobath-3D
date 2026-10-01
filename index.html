@@ -544,7 +544,7 @@
         data-name="PURE WHITE"
         aria-label="Pure White"
         title="Pure White"
-        style="background:#F4F3EF">
+        style="background:#FFFFFF">
       </button>
 
       <button
@@ -609,7 +609,7 @@
         data-name="IVORY"
         aria-label="Ivory tile"
         title="Ivory"
-        style="background:#E8E7E3">
+        style="background:#E7DFD3">
       </button>
 
       <button
@@ -1154,7 +1154,8 @@ let floorTexture;
 
 
 function setTileColor(
-  color
+  color,
+  name = ""
 ) {
 
   if (wallTexture)
@@ -1197,6 +1198,30 @@ function setTileColor(
     floorTexture;
 
 
+  /*
+     WHITE 타일은 웜 조명 때문에 아이보리로 보이지 않도록
+     아주 약한 중성 화이트 발광을 섞어 시각적으로 쨍한 백색 유지.
+     다른 타일에는 적용하지 않음.
+  */
+  if (name === "WHITE") {
+
+    wallMaterial.emissive.set("#FFFFFF");
+    wallMaterial.emissiveIntensity = 0.16;
+
+    floorMaterial.emissive.set("#FFFFFF");
+    floorMaterial.emissiveIntensity = 0.10;
+
+  }
+  else {
+
+    wallMaterial.emissive.set("#000000");
+    wallMaterial.emissiveIntensity = 0;
+
+    floorMaterial.emissive.set("#000000");
+    floorMaterial.emissiveIntensity = 0;
+
+  }
+
   wallMaterial.needsUpdate =
     true;
 
@@ -1207,7 +1232,8 @@ function setTileColor(
 
 
 setTileColor(
-  "#E8E7E3"
+  "#E8E7E3",
+  "IVORY"
 );
 
 
@@ -1220,7 +1246,7 @@ const basinMaterial =
 
     color:
       new THREE.Color(
-        "#F4F3EF"
+        "#F8FBFF"
       ),
 
     metalness:
@@ -1248,7 +1274,14 @@ const basinMaterial =
       0.02,
 
     clearcoatRoughness:
-      0.30
+      0.30,
+
+    /* Pure White의 누런 조명 캐스트를 아주 약하게 중화 */
+    emissive:
+      new THREE.Color("#EEF4FA"),
+
+    emissiveIntensity:
+      0.045
 
   });
 
@@ -1270,7 +1303,7 @@ const basinStyles = {
 
   pureWhite: {
     name: "PURE WHITE",
-    base: "#F4F3EF",
+    base: "#F8FBFF",
     roughness: 0.25,
     bumpScale: 0,
     seed: 11,
@@ -1475,12 +1508,24 @@ function applyBasinStyle(key) {
     basinMaterial.map = textures.map;
     basinMaterial.bumpMap = textures.bumpMap;
     basinMaterial.bumpScale = style.bumpScale;
+
+    basinMaterial.emissive.set("#000000");
+    basinMaterial.emissiveIntensity = 0;
   }
   else {
     basinMaterial.color.set(style.base);
     basinMaterial.map = null;
     basinMaterial.bumpMap = null;
     basinMaterial.bumpScale = 0;
+
+    if (key === "pureWhite") {
+      basinMaterial.emissive.set("#EEF4FA");
+      basinMaterial.emissiveIntensity = 0.055;
+    }
+    else {
+      basinMaterial.emissive.set("#000000");
+      basinMaterial.emissiveIntensity = 0;
+    }
   }
 
   basinMaterial.roughness = style.roughness;
@@ -2225,7 +2270,8 @@ document
 
 
           setTileColor(
-            button.dataset.color
+            button.dataset.color,
+            button.dataset.name
           );
 
 
