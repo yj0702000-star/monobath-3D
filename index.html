@@ -495,7 +495,7 @@
   class="guide"
   id="guide">
 
-  DRAG TO ROTATE · DRAG UP TO VIEW TOP · SCROLL TO ZOOM
+  DRAG TO ROTATE · VERTICAL DRAG TO TILT · SCROLL TO ZOOM
 
 </div>
 
@@ -530,32 +530,41 @@
     <div class="swatches">
 
       <button
-  class="swatch tile-swatch"
-  data-color="#FFFFFF"
-  data-name="WHITE"
-  style="background:#FFFFFF">
-</button>
+        class="swatch basin-swatch"
+        data-key="frozenWhite"
+        data-name="FROZEN WHITE"
+        aria-label="Frozen White"
+        title="Frozen White"
+        style="background:#F0F1EF">
+      </button>
 
-<button
-  class="swatch tile-swatch active"
-  data-color="#E8E7E3"
-  data-name="IVORY"
-  style="background:#E8E7E3">
-</button>
+      <button
+        class="swatch basin-swatch active"
+        data-key="pureWhite"
+        data-name="PURE WHITE"
+        aria-label="Pure White"
+        title="Pure White"
+        style="background:#F4F3EF">
+      </button>
 
-<button
-  class="swatch tile-swatch"
-  data-color="#A6A6A3"
-  data-name="GREY"
-  style="background:#A6A6A3">
-</button>
+      <button
+        class="swatch basin-swatch"
+        data-key="sandBeige"
+        data-name="SAND BEIGE"
+        aria-label="Sand Beige"
+        title="Sand Beige"
+        style="background:#D7C9AF">
+      </button>
 
-<button
-  class="swatch tile-swatch"
-  data-color="#3C3C3A"
-  data-name="BLACK"
-  style="background:#3C3C3A">
-</button>
+      <button
+        class="swatch basin-swatch"
+        data-key="urbanGrey"
+        data-name="URBAN GREY"
+        aria-label="Urban Grey"
+        title="Urban Grey"
+        style="background:#92918E">
+      </button>
+
     </div>
 
   </div>
@@ -587,30 +596,38 @@
 
       <button
         class="swatch tile-swatch"
-        data-color="#E8E7E3"
+        data-color="#FFFFFF"
         data-name="WHITE"
-        style="background:#E8E7E3">
+        aria-label="White tile"
+        title="White"
+        style="background:#FFFFFF">
       </button>
 
       <button
         class="swatch tile-swatch active"
-        data-color="#BEB3A5"
+        data-color="#E8E7E3"
         data-name="IVORY"
-        style="background:#BEB3A5">
+        aria-label="Ivory tile"
+        title="Ivory"
+        style="background:#E8E7E3">
       </button>
 
       <button
         class="swatch tile-swatch"
         data-color="#A6A6A3"
         data-name="GREY"
+        aria-label="Grey tile"
+        title="Grey"
         style="background:#A6A6A3">
       </button>
 
       <button
         class="swatch tile-swatch"
-        data-color="#484846"
-        data-name="CHARCOAL"
-        style="background:#484846">
+        data-color="#3C3C3A"
+        data-name="BLACK"
+        aria-label="Black tile"
+        title="Black"
+        style="background:#3C3C3A">
       </button>
 
     </div>
@@ -1239,6 +1256,263 @@ const basinMaterial =
 /* =====================================================
    CHROME
 ===================================================== */
+
+
+/* =====================================================
+   SOLID SURFACE CHIP TEXTURES
+   PURE WHITE     = clean / no visible chips
+   FROZEN WHITE   = translucent grey micro chips
+   SAND BEIGE     = warm beige micro chips
+   URBAN GREY     = grey + dark micro chips
+===================================================== */
+
+const basinStyles = {
+
+  pureWhite: {
+    name: "PURE WHITE",
+    base: "#F4F3EF",
+    roughness: 0.25,
+    bumpScale: 0,
+    seed: 11,
+    chipSets: []
+  },
+
+  frozenWhite: {
+    name: "FROZEN WHITE",
+    base: "#F0F1EF",
+    roughness: 0.27,
+    bumpScale: 0.0012,
+    seed: 29,
+    chipSets: [
+      { color: "#BFC3C1", count: 820, minR: 0.35, maxR: 1.15, minA: 0.16, maxA: 0.34, bump: 142 },
+      { color: "#AEB3B0", count: 300, minR: 0.45, maxR: 1.55, minA: 0.14, maxA: 0.28, bump: 148 },
+      { color: "#FFFFFF", count: 260, minR: 0.30, maxR: 1.20, minA: 0.18, maxA: 0.34, bump: 136 },
+      { color: "#D4D6D3", count: 90,  minR: 1.20, maxR: 2.50, minA: 0.12, maxA: 0.22, bump: 145 }
+    ]
+  },
+
+  sandBeige: {
+    name: "SAND BEIGE",
+    base: "#D7C9AF",
+    roughness: 0.29,
+    bumpScale: 0.0015,
+    seed: 47,
+    chipSets: [
+      { color: "#B5A487", count: 620, minR: 0.40, maxR: 1.35, minA: 0.22, maxA: 0.45, bump: 146 },
+      { color: "#EEE2CB", count: 470, minR: 0.35, maxR: 1.30, minA: 0.20, maxA: 0.40, bump: 136 },
+      { color: "#9E896D", count: 210, minR: 0.45, maxR: 1.65, minA: 0.18, maxA: 0.34, bump: 151 },
+      { color: "#F4EBDD", count: 80,  minR: 1.20, maxR: 2.80, minA: 0.14, maxA: 0.25, bump: 138 }
+    ]
+  },
+
+  urbanGrey: {
+    name: "URBAN GREY",
+    base: "#92918E",
+    roughness: 0.31,
+    bumpScale: 0.0017,
+    seed: 71,
+    chipSets: [
+      { color: "#5E605E", count: 660, minR: 0.38, maxR: 1.30, minA: 0.22, maxA: 0.46, bump: 151 },
+      { color: "#B5B5B1", count: 430, minR: 0.35, maxR: 1.25, minA: 0.20, maxA: 0.40, bump: 137 },
+      { color: "#414341", count: 220, minR: 0.45, maxR: 1.70, minA: 0.18, maxA: 0.36, bump: 155 },
+      { color: "#D0CFCA", count: 70,  minR: 1.20, maxR: 2.65, minA: 0.12, maxA: 0.24, bump: 136 }
+    ]
+  }
+
+};
+
+
+function seededRandom(seed) {
+
+  let value = seed >>> 0;
+
+  return () => {
+
+    value += 0x6D2B79F5;
+
+    let t = value;
+
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+
+  };
+
+}
+
+
+function createSolidSurfaceTextures(style) {
+
+  if (!style.chipSets.length) {
+    return {
+      map: null,
+      bumpMap: null,
+      preview: style.base
+    };
+  }
+
+  const size = 1024;
+  const colorCanvas = document.createElement("canvas");
+  const bumpCanvas = document.createElement("canvas");
+
+  colorCanvas.width = colorCanvas.height = size;
+  bumpCanvas.width = bumpCanvas.height = size;
+
+  const ctx = colorCanvas.getContext("2d");
+  const bumpCtx = bumpCanvas.getContext("2d");
+
+  ctx.fillStyle = style.base;
+  ctx.fillRect(0, 0, size, size);
+
+  bumpCtx.fillStyle = "rgb(128,128,128)";
+  bumpCtx.fillRect(0, 0, size, size);
+
+  const random = seededRandom(style.seed);
+
+  /*
+     아주 약한 베이스 입자.
+     멀리서는 단색처럼 보이고 가까이에서만 재질감이 남는다.
+  */
+  const baseImage = ctx.getImageData(0, 0, size, size);
+  const pixels = baseImage.data;
+
+  for (let i = 0; i < pixels.length; i += 4) {
+    const variation = (random() - 0.5) * 1.25;
+    pixels[i] += variation;
+    pixels[i + 1] += variation;
+    pixels[i + 2] += variation;
+  }
+
+  ctx.putImageData(baseImage, 0, 0);
+
+  style.chipSets.forEach(set => {
+
+    for (let i = 0; i < set.count; i++) {
+
+      const x = random() * size;
+      const y = random() * size;
+      const radius = set.minR + random() * (set.maxR - set.minR);
+      const alpha = set.minA + random() * (set.maxA - set.minA);
+
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = set.color;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      /* 완전한 원점 느낌을 줄이기 위한 작은 보조 입자 */
+      if (radius > 1.2 && random() > 0.45) {
+        ctx.globalAlpha = alpha * 0.55;
+        ctx.beginPath();
+        ctx.arc(
+          x + (random() - 0.5) * radius,
+          y + (random() - 0.5) * radius,
+          radius * (0.25 + random() * 0.28),
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+      }
+
+      bumpCtx.globalAlpha = 0.55;
+      bumpCtx.fillStyle = `rgb(${set.bump},${set.bump},${set.bump})`;
+      bumpCtx.beginPath();
+      bumpCtx.arc(x, y, Math.max(0.45, radius * 0.85), 0, Math.PI * 2);
+      bumpCtx.fill();
+
+    }
+
+  });
+
+  ctx.globalAlpha = 1;
+  bumpCtx.globalAlpha = 1;
+
+  const map = new THREE.CanvasTexture(colorCanvas);
+  const bumpMap = new THREE.CanvasTexture(bumpCanvas);
+
+  [map, bumpMap].forEach(texture => {
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(3, 3);
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = true;
+    texture.needsUpdate = true;
+  });
+
+  map.colorSpace = THREE.SRGBColorSpace;
+  bumpMap.colorSpace = THREE.NoColorSpace;
+
+  return {
+    map,
+    bumpMap,
+    preview: colorCanvas.toDataURL("image/png")
+  };
+
+}
+
+
+const basinTextureCache = {};
+
+Object.entries(basinStyles).forEach(([key, style]) => {
+  basinTextureCache[key] = createSolidSurfaceTextures(style);
+});
+
+
+function applyBasinStyle(key) {
+
+  const style = basinStyles[key];
+  const textures = basinTextureCache[key];
+
+  if (!style || !textures) return;
+
+  if (textures.map) {
+    basinMaterial.color.set("#FFFFFF");
+    basinMaterial.map = textures.map;
+    basinMaterial.bumpMap = textures.bumpMap;
+    basinMaterial.bumpScale = style.bumpScale;
+  }
+  else {
+    basinMaterial.color.set(style.base);
+    basinMaterial.map = null;
+    basinMaterial.bumpMap = null;
+    basinMaterial.bumpScale = 0;
+  }
+
+  basinMaterial.roughness = style.roughness;
+  basinMaterial.needsUpdate = true;
+
+  basinName.textContent = style.name;
+
+}
+
+
+/* 선택 버튼에도 실제 칩 패턴 미리보기 적용 */
+document.querySelectorAll(".basin-swatch").forEach(button => {
+
+  const key = button.dataset.key;
+  const style = basinStyles[key];
+  const preview = basinTextureCache[key]?.preview;
+
+  if (!style) return;
+
+  if (preview && preview.startsWith("data:")) {
+    button.style.backgroundImage = `url(${preview})`;
+    button.style.backgroundSize = "cover";
+    button.style.backgroundPosition = "center";
+  }
+  else {
+    button.style.background = style.base;
+  }
+
+});
+
+
+/* 기본 선택 = PURE WHITE */
+applyBasinStyle("pureWhite");
+
 
 const faucetMaterial =
   new THREE.MeshPhysicalMaterial({
@@ -1896,21 +2170,13 @@ document
                 )
             );
 
-
           button.classList.add(
             "active"
           );
 
-
-          basinMaterial
-            .color
-            .set(
-              button.dataset.color
-            );
-
-
-          basinName.textContent =
-            button.dataset.name;
+          applyBasinStyle(
+            button.dataset.key
+          );
 
         }
 
