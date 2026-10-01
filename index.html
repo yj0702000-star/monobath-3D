@@ -638,10 +638,9 @@ import {
 } from "three/addons/environments/RoomEnvironment.js";
 
 
-
-/* =============================================
-   BASIC
-============================================= */
+/* =====================================================
+   DOM
+===================================================== */
 
 const container =
   document.getElementById("app");
@@ -655,162 +654,110 @@ const loaderElement =
 const loaderProgress =
   document.getElementById("loaderProgress");
 
+const basinName =
+  document.getElementById("basinName");
+
+const tileName =
+  document.getElementById("tileName");
+
+
+/* =====================================================
+   SCENE
+===================================================== */
 
 const scene =
   new THREE.Scene();
 
-
 scene.background =
-  new THREE.Color(0xF4F2ED);
+  new THREE.Color("#F4F2ED");
 
 
-
-/* =============================================
+/* =====================================================
    CAMERA
-============================================= */
+   ★ 카메라는 여기서 완전히 고정
+===================================================== */
 
 const camera =
   new THREE.PerspectiveCamera(
-    35,
+    34,
     window.innerWidth /
     window.innerHeight,
     0.01,
     100
   );
 
+camera.position.set(
+  0,
+  1.12,
+  2.35
+);
 
-const cameraTarget =
-  new THREE.Vector3(
-    0,
-    0.92,
-    0
-  );
-
-
-let radius = 1.65;
-
-let pitch =
-  THREE.MathUtils.degToRad(13);
+camera.lookAt(
+  0,
+  0.78,
+  0.05
+);
 
 
-const minRadius = 1.0;
-const maxRadius = 2.45;
-
-const minPitch =
-  THREE.MathUtils.degToRad(2);
-
-const maxPitch =
-  THREE.MathUtils.degToRad(48);
-
-
-
-function updateCamera() {
-
-  const y =
-    cameraTarget.y +
-    Math.sin(pitch) *
-    radius;
-
-  const z =
-    cameraTarget.z +
-    Math.cos(pitch) *
-    radius;
-
-  camera.position.set(
-    0,
-    y,
-    z
-  );
-
-  camera.lookAt(
-    cameraTarget
-  );
-
-}
-
-
-updateCamera();
-
-
-
-/* =============================================
+/* =====================================================
    RENDERER
-============================================= */
+===================================================== */
 
 const renderer =
   new THREE.WebGLRenderer({
-
     antialias: true,
-
-    alpha: false,
-
-    powerPreference:
-      "high-performance"
-
+    powerPreference: "high-performance"
   });
-
 
 renderer.setSize(
   window.innerWidth,
   window.innerHeight
 );
 
-
 renderer.setPixelRatio(
-
   Math.min(
     window.devicePixelRatio,
     2
   )
-
 );
-
 
 renderer.outputColorSpace =
   THREE.SRGBColorSpace;
 
-
 renderer.toneMapping =
   THREE.ACESFilmicToneMapping;
 
-
 renderer.toneMappingExposure =
-  1.12;
-
+  1.08;
 
 renderer.shadowMap.enabled =
   true;
 
-
 renderer.shadowMap.type =
   THREE.PCFSoftShadowMap;
 
+renderer.domElement.style.cursor =
+  "grab";
 
 container.appendChild(
   renderer.domElement
 );
 
 
+/* =====================================================
+   HDRI
+===================================================== */
 
-/* =============================================
-   HDR ENVIRONMENT
-============================================= */
-
-const pmremGenerator =
+const pmrem =
   new THREE.PMREMGenerator(
     renderer
   );
 
-
-pmremGenerator.compileEquirectangularShader();
-
-
 const roomEnvironment =
   new RoomEnvironment();
 
-
-const fallbackEnvironment =
-  pmremGenerator
+scene.environment =
+  pmrem
     .fromScene(
       roomEnvironment,
       0.04
@@ -818,174 +765,134 @@ const fallbackEnvironment =
     .texture;
 
 
-scene.environment =
-  fallbackEnvironment;
-
-
-
-new RGBELoader()
-  .load(
-
-    "./white_studio_06_1k.hdr",
-
-    hdr => {
-
-      const envMap =
-        pmremGenerator
-          .fromEquirectangular(
-            hdr
-          )
-          .texture;
-
-      scene.environment =
-        envMap;
-
-      hdr.dispose();
-
-      pmremGenerator.dispose();
-
-    },
-
-    undefined,
-
-    error => {
-
-      console.warn(
-        "HDRI fallback active",
-        error
-      );
-
-    }
-
-  );
-
-
-
-/* =============================================
-   LIGHTS
-============================================= */
-
-
 /*
-   HDRI = 기본 반사
-
-   Directional Light =
-   제품 모서리와 경사면을
-   보여주는 소프트 키 라이트
+   GitHub에 이미 있는 HDR
 */
+new RGBELoader().load(
 
+  "./white_studio_06_1k.hdr",
 
-const keyLight =
-  new THREE.DirectionalLight(
-    0xFFF7ED,
-    2.8
-  );
+  hdr => {
 
+    const env =
+      pmrem
+        .fromEquirectangular(
+          hdr
+        )
+        .texture;
 
-keyLight.position.set(
-  -2.2,
-  3.4,
-  3.0
+    scene.environment =
+      env;
+
+    hdr.dispose();
+
+  },
+
+  undefined,
+
+  error => {
+
+    console.warn(
+      "HDRI load failed. Fallback active.",
+      error
+    );
+
+  }
+
 );
 
 
+/* =====================================================
+   WEB LIGHTING
+===================================================== */
+
+
+/*
+   왼쪽 위 큰 소프트박스 느낌
+*/
+const keyLight =
+  new THREE.DirectionalLight(
+    0xFFF8EF,
+    2.35
+  );
+
+keyLight.position.set(
+  -2.8,
+  3.8,
+  3.2
+);
+
 keyLight.castShadow =
   true;
-
 
 keyLight.shadow.mapSize.set(
   2048,
   2048
 );
 
-
-keyLight.shadow.camera.left =
-  -2;
-
-keyLight.shadow.camera.right =
-  2;
-
-keyLight.shadow.camera.top =
-  2;
-
-keyLight.shadow.camera.bottom =
-  -2;
-
-
 keyLight.shadow.bias =
-  -0.0002;
-
+  -0.00015;
 
 scene.add(
   keyLight
 );
 
 
-
+/*
+   반대편 아주 약한 Fill
+*/
 const fillLight =
   new THREE.DirectionalLight(
-    0xDDE5EA,
-    0.72
+    0xE6EBEE,
+    0.55
   );
 
-
 fillLight.position.set(
-  2.5,
-  1.8,
+  3,
+  2,
   2
 );
-
 
 scene.add(
   fillLight
 );
 
 
-
-const hemisphereLight =
+/*
+   전체 환경광
+*/
+const hemiLight =
   new THREE.HemisphereLight(
-
     0xFFFFFF,
-
-    0xC8C5BF,
-
-    0.60
-
+    0xB8B4AC,
+    0.48
   );
 
-
 scene.add(
-  hemisphereLight
+  hemiLight
 );
 
 
-
-/* =============================================
-   TILE TEXTURE
-============================================= */
-
+/* =====================================================
+   TILE GENERATOR
+===================================================== */
 
 function makeTileTexture(
   baseColor
 ) {
 
-  const size =
-    512;
-
+  const size = 512;
 
   const canvas =
     document.createElement(
       "canvas"
     );
 
-
   canvas.width =
     size;
 
-
   canvas.height =
     size;
-
 
   const ctx =
     canvas.getContext(
@@ -993,13 +900,10 @@ function makeTileTexture(
     );
 
 
-  /*
-     Base
-  */
+  /* base */
 
   ctx.fillStyle =
     baseColor;
-
 
   ctx.fillRect(
     0,
@@ -1010,10 +914,10 @@ function makeTileTexture(
 
 
   /*
-     Very subtle surface variation
+     아주 미세한 표면 입자
   */
 
-  const imageData =
+  const image =
     ctx.getImageData(
       0,
       0,
@@ -1021,10 +925,8 @@ function makeTileTexture(
       size
     );
 
-
   const data =
-    imageData.data;
-
+    image.data;
 
   for (
     let i = 0;
@@ -1032,52 +934,44 @@ function makeTileTexture(
     i += 4
   ) {
 
-    const variation =
+    const n =
       (Math.random() - .5)
-      * 3.2;
+      * 2.4;
 
-
-    data[i] +=
-      variation;
-
-    data[i + 1] +=
-      variation;
-
-    data[i + 2] +=
-      variation;
+    data[i] += n;
+    data[i + 1] += n;
+    data[i + 2] += n;
 
   }
 
-
   ctx.putImageData(
-    imageData,
+    image,
     0,
     0
   );
 
 
   /*
-     600x600 tile grout
+     줄눈
   */
 
   ctx.strokeStyle =
-    "rgba(90,90,90,.20)";
-
+    "rgba(75,75,75,.18)";
 
   ctx.lineWidth =
-    3;
-
+    2;
 
   ctx.strokeRect(
-    1.5,
-    1.5,
-    size - 3,
-    size - 3
+    1,
+    1,
+    size - 2,
+    size - 2
   );
 
 
   /*
-     Slight soft highlight
+     타일 한 장 안의
+     아주 미세한 조명 변화
   */
 
   const gradient =
@@ -1088,22 +982,18 @@ function makeTileTexture(
       size
     );
 
-
   gradient.addColorStop(
     0,
     "rgba(255,255,255,.045)"
   );
 
-
   gradient.addColorStop(
     1,
-    "rgba(0,0,0,.018)"
+    "rgba(0,0,0,.02)"
   );
-
 
   ctx.fillStyle =
     gradient;
-
 
   ctx.fillRect(
     0,
@@ -1118,49 +1008,38 @@ function makeTileTexture(
       canvas
     );
 
-
   texture.wrapS =
     THREE.RepeatWrapping;
-
 
   texture.wrapT =
     THREE.RepeatWrapping;
 
-
   texture.colorSpace =
     THREE.SRGBColorSpace;
-
 
   texture.anisotropy =
     renderer.capabilities
       .getMaxAnisotropy();
-
 
   return texture;
 
 }
 
 
-
-/* =============================================
-   WALL + FLOOR
-============================================= */
-
+/* =====================================================
+   WALL / FLOOR
+===================================================== */
 
 const wallMaterial =
   new THREE.MeshPhysicalMaterial({
 
-    color:
-      0xFFFFFF,
+    color: 0xffffff,
 
-    roughness:
-      0.72,
+    metalness: 0,
 
-    metalness:
-      0,
+    roughness: 0.73,
 
-    envMapIntensity:
-      0.55
+    envMapIntensity: 0.45
 
   });
 
@@ -1168,152 +1047,131 @@ const wallMaterial =
 const floorMaterial =
   new THREE.MeshPhysicalMaterial({
 
-    color:
-      0xFFFFFF,
+    color: 0xffffff,
 
-    roughness:
-      0.67,
+    metalness: 0,
 
-    metalness:
-      0,
+    roughness: 0.68,
 
-    envMapIntensity:
-      0.65
+    envMapIntensity: 0.52
 
   });
 
 
+/*
+   3.6m 벽
+   600 타일 = 가로 6장
+*/
 
 const wall =
   new THREE.Mesh(
 
     new THREE.PlaneGeometry(
       3.6,
-      2.8
+      2.4
     ),
 
     wallMaterial
 
   );
 
-
 wall.position.set(
   0,
-  1.4,
-  -0.38
+  1.2,
+  -0.48
 );
-
 
 wall.receiveShadow =
   true;
-
 
 scene.add(
   wall
 );
 
 
+/*
+   바닥
+*/
 
 const floor =
   new THREE.Mesh(
 
     new THREE.PlaneGeometry(
       3.6,
-      3
+      2.4
     ),
 
     floorMaterial
 
   );
 
-
 floor.rotation.x =
   -Math.PI / 2;
-
 
 floor.position.set(
   0,
   0,
-  0.95
+  0.72
 );
-
 
 floor.receiveShadow =
   true;
-
 
 scene.add(
   floor
 );
 
 
-
-let wallTileTexture = null;
-let floorTileTexture = null;
-
+let wallTexture;
+let floorTexture;
 
 
 function setTileColor(
   color
 ) {
 
-  if (wallTileTexture)
-    wallTileTexture.dispose();
+  if (wallTexture)
+    wallTexture.dispose();
+
+  if (floorTexture)
+    floorTexture.dispose();
 
 
-  if (floorTileTexture)
-    floorTileTexture.dispose();
-
-
-  wallTileTexture =
+  wallTexture =
     makeTileTexture(
       color
     );
 
-
-  floorTileTexture =
+  floorTexture =
     makeTileTexture(
       color
     );
 
 
   /*
-     Wall width 3.6m
-     600mm tile
-
-     = 6 tiles
+     정확히 600 × 600
   */
 
-  wallTileTexture.repeat.set(
+  wallTexture.repeat.set(
     6,
-    4.6667
+    4
   );
 
-
-  /*
-     Floor
-     3.6m x 3m
-
-     = 6 x 5 tiles
-  */
-
-  floorTileTexture.repeat.set(
+  floorTexture.repeat.set(
     6,
-    5
+    4
   );
 
 
   wallMaterial.map =
-    wallTileTexture;
-
+    wallTexture;
 
   floorMaterial.map =
-    floorTileTexture;
+    floorTexture;
 
 
   wallMaterial.needsUpdate =
     true;
-
 
   floorMaterial.needsUpdate =
     true;
@@ -1326,20 +1184,9 @@ setTileColor(
 );
 
 
-
-/* =============================================
-   PRODUCT MATERIALS
-============================================= */
-
-
-/*
-   MMA SOLID SURFACE
-
-   Glossy ceramic X
-
-   Soft satin solid surface O
-*/
-
+/* =====================================================
+   MONO MMA
+===================================================== */
 
 const basinMaterial =
   new THREE.MeshPhysicalMaterial({
@@ -1352,31 +1199,36 @@ const basinMaterial =
     metalness:
       0,
 
+    /*
+       반무광 MMA
+    */
     roughness:
-      0.33,
+      0.28,
 
     ior:
       1.48,
 
     specularIntensity:
-      0.62,
+      0.58,
 
     envMapIntensity:
-      1.15,
+      1.18,
 
+    /*
+       아주 약한 표면 코팅 느낌
+    */
     clearcoat:
-      0.045,
+      0.035,
 
     clearcoatRoughness:
-      0.40
+      0.38
 
   });
 
 
-
-/*
-   POLISHED CHROME
-*/
+/* =====================================================
+   CHROME
+===================================================== */
 
 const faucetMaterial =
   new THREE.MeshPhysicalMaterial({
@@ -1390,81 +1242,138 @@ const faucetMaterial =
       1,
 
     roughness:
-      0.12,
+      0.10,
 
     envMapIntensity:
       1.75,
 
     clearcoat:
-      0.04,
+      0.03,
 
     clearcoatRoughness:
-      0.12
+      0.10
 
   });
 
 
+/* =====================================================
+   ★ PRODUCT PIVOT
+   핵심 부분
 
-/* =============================================
-   MODEL
-============================================= */
+   화면 X
+   카메라 X
+   제품만 회전
+===================================================== */
 
+const productPivot =
+  new THREE.Group();
 
-let product =
-  null;
-
-
-let productRotationY =
-  0;
-
-
-const gltfLoader =
-  new GLTFLoader();
+productPivot.rotation.order =
+  "YXZ";
 
 
+/*
+   벽걸이 세면대 높이
+*/
+
+productPivot.position.set(
+  0,
+  0.78,
+  0.10
+);
+
+scene.add(
+  productPivot
+);
+
+
+let product = null;
+
+
+/* =====================================================
+   ROTATION STATE
+===================================================== */
+
+let currentYaw = 0;
+let targetYaw = 0;
+
+let currentPitch = 0;
+let targetPitch = 0;
+
+let currentZoom = 1;
+let targetZoom = 1;
+
+
+/*
+   위쪽 확인 가능한 범위
+*/
+
+const minPitch =
+  THREE.MathUtils.degToRad(
+    -5
+  );
+
+const maxPitch =
+  THREE.MathUtils.degToRad(
+    34
+  );
+
+
+const minZoom =
+  0.82;
+
+const maxZoom =
+  1.55;
+
+
+/*
+   가벼운 관성
+*/
+
+let yawVelocity = 0;
+
+
+/* =====================================================
+   MATERIAL DETECTION
+===================================================== */
 
 function chooseMaterial(
-  originalMaterial,
+  material,
   objectName = ""
 ) {
 
-  const materialName =
-    originalMaterial?.name ||
-    "";
+  const matName =
+    material?.name || "";
 
-
-  const source =
+  const text =
     (
-      materialName +
+      matName +
       " " +
       objectName
     )
-    .toLowerCase();
+      .toLowerCase();
 
 
   /*
-     Previous GLB material:
+     기존 GLB 수전 재질
      Metal Corrugated Shiny
-
-     Also support:
-     Chrome / Faucet / Silver / Cromo
   */
 
   if (
 
-    source.includes("metal") ||
+    text.includes("metal") ||
 
-    source.includes("chrome") ||
+    text.includes("corrugated") ||
 
-    source.includes("corrugated") ||
+    text.includes("chrome") ||
 
-    source.includes("faucet") ||
+    text.includes("faucet") ||
 
-    source.includes("silver") ||
+    text.includes("silver") ||
 
-    source.includes("cromo") ||
+    text.includes("cromo") ||
 
-    source.includes("tap")
+    text.includes("tap")
 
   ) {
 
@@ -1473,16 +1382,17 @@ function chooseMaterial(
   }
 
 
-  /*
-     Everything else in this
-     two-material MONO600 GLB
-     becomes MMA.
-  */
-
   return basinMaterial;
 
 }
 
+
+/* =====================================================
+   LOAD MONO 600
+===================================================== */
+
+const gltfLoader =
+  new GLTFLoader();
 
 
 gltfLoader.load(
@@ -1496,7 +1406,12 @@ gltfLoader.load(
       gltf.scene;
 
 
+    /*
+       웹 재질로 교체
+    */
+
     product.traverse(
+
       object => {
 
         if (!object.isMesh)
@@ -1506,14 +1421,9 @@ gltfLoader.load(
         object.castShadow =
           true;
 
-
         object.receiveShadow =
           true;
 
-
-        /*
-           Multi material support
-        */
 
         if (
           Array.isArray(
@@ -1524,9 +1434,9 @@ gltfLoader.load(
           object.material =
             object.material.map(
 
-              mat =>
+              material =>
                 chooseMaterial(
-                  mat,
+                  material,
                   object.name
                 )
 
@@ -1538,23 +1448,26 @@ gltfLoader.load(
 
           object.material =
             chooseMaterial(
-
               object.material,
-
               object.name
-
             );
 
         }
 
       }
+
     );
 
 
     /*
-       NORMALISE EXACTLY TO
-       MONO 600 WIDTH = 600mm
+       제품 실제 폭을
+       정확히 600mm로 맞춤
     */
+
+    product.updateMatrixWorld(
+      true
+    );
+
 
     let box =
       new THREE.Box3()
@@ -1562,29 +1475,39 @@ gltfLoader.load(
           product
         );
 
-
-    let size =
+    const size =
       new THREE.Vector3();
-
 
     box.getSize(
       size
     );
 
 
-    const scale =
+    const modelScale =
       0.60 /
       size.x;
 
 
-    product.scale
-      .setScalar(
-        scale
-      );
+    product.scale.setScalar(
+      modelScale
+    );
+
+
+    product.updateMatrixWorld(
+      true
+    );
 
 
     /*
-       Recalculate box
+       ★ 매우 중요
+
+       제품의 진짜 중심을
+       productPivot의 0,0,0으로 이동.
+
+       그래서 회전할 때
+       제품이 빙글빙글 궤도를 돌지 않고
+
+       그 자리에서 정확하게 회전함.
     */
 
     box =
@@ -1597,83 +1520,33 @@ gltfLoader.load(
     const center =
       new THREE.Vector3();
 
-
     box.getCenter(
       center
     );
 
 
-    /*
-       Center horizontally
-       and depth
-    */
-
-    product.position.x -=
-      center.x;
+    product.position.set(
+      -center.x,
+      -center.y,
+      -center.z
+    );
 
 
-    product.position.z -=
-      center.z;
-
-
-    /*
-       Bottom height
-       720mm from floor
-    */
-
-    box =
-      new THREE.Box3()
-        .setFromObject(
-          product
-        );
-
-
-    product.position.y +=
-      0.72 -
-      box.min.y;
-
-
-    scene.add(
+    productPivot.add(
       product
     );
 
 
     /*
-       Product target
+       시작 크기
     */
 
-    const finalBox =
-      new THREE.Box3()
-        .setFromObject(
-          product
-        );
-
-
-    const finalCenter =
-      new THREE.Vector3();
-
-
-    finalBox.getCenter(
-      finalCenter
+    productPivot.scale.setScalar(
+      1
     );
 
 
-    cameraTarget.set(
-
-      finalCenter.x,
-
-      finalCenter.y,
-
-      finalCenter.z
-
-    );
-
-
-    updateCamera();
-
-
-    loaderProgress
-      .style.width =
+    loaderProgress.style.width =
       "100%";
 
 
@@ -1687,7 +1560,7 @@ gltfLoader.load(
           );
 
       },
-      250
+      200
     );
 
   },
@@ -1695,21 +1568,19 @@ gltfLoader.load(
 
   xhr => {
 
-    if (
-      xhr.total
-    ) {
+    if (!xhr.total)
+      return;
 
-      const percent =
+
+    const percent =
+      (
         xhr.loaded /
-        xhr.total *
-        100;
+        xhr.total
+      ) * 100;
 
 
-      loaderProgress
-        .style.width =
-        `${percent}%`;
-
-    }
+    loaderProgress.style.width =
+      percent + "%";
 
   },
 
@@ -1717,7 +1588,7 @@ gltfLoader.load(
   error => {
 
     console.error(
-      "MONO600 GLB LOAD ERROR",
+      "MONO 600 GLB LOAD ERROR",
       error
     );
 
@@ -1726,173 +1597,148 @@ gltfLoader.load(
 );
 
 
+/* =====================================================
+   ★ DRAG
+===================================================== */
 
-/* =============================================
-   INTERACTION
-============================================= */
+let dragging = false;
 
+let previousX = 0;
+let previousY = 0;
 
-let dragging =
-  false;
-
-
-let startX =
-  0;
+let hasInteracted = false;
 
 
-let startY =
-  0;
+renderer.domElement.addEventListener(
+
+  "pointerdown",
+
+  event => {
+
+    dragging =
+      true;
+
+    previousX =
+      event.clientX;
+
+    previousY =
+      event.clientY;
+
+    yawVelocity =
+      0;
 
 
-let startRotation =
-  0;
+    renderer.domElement
+      .setPointerCapture(
+        event.pointerId
+      );
 
 
-let startPitch =
-  pitch;
+    renderer.domElement.style.cursor =
+      "grabbing";
+
+  }
+
+);
 
 
-let hasInteracted =
-  false;
+renderer.domElement.addEventListener(
+
+  "pointermove",
+
+  event => {
+
+    if (
+      !dragging ||
+      !product
+    )
+      return;
 
 
+    const dx =
+      event.clientX -
+      previousX;
 
-renderer.domElement
-  .addEventListener(
+    const dy =
+      event.clientY -
+      previousY;
 
-    "pointerdown",
 
-    event => {
+    previousX =
+      event.clientX;
 
-      dragging =
+    previousY =
+      event.clientY;
+
+
+    /*
+       ★ 좌우
+
+       CAMERA 안 움직임.
+
+       제품 자체만 회전.
+    */
+
+    targetYaw +=
+      dx * 0.010;
+
+
+    /*
+       살짝 휙 돌리는 느낌
+    */
+
+    yawVelocity =
+      dx * 0.0012;
+
+
+    /*
+       ★ 위 / 아래
+
+       카메라가 올라가는 게 아니라
+
+       제품 자체가 살짝 기울어져
+       위쪽과 볼 내부를 보여줌.
+    */
+
+    targetPitch +=
+      -dy * 0.006;
+
+
+    targetPitch =
+      THREE.MathUtils.clamp(
+
+        targetPitch,
+
+        minPitch,
+
+        maxPitch
+
+      );
+
+
+    if (
+      !hasInteracted &&
+      (
+        Math.abs(dx) > 5 ||
+        Math.abs(dy) > 5
+      )
+    ) {
+
+      hasInteracted =
         true;
 
-
-      startX =
-        event.clientX;
-
-
-      startY =
-        event.clientY;
-
-
-      startRotation =
-        productRotationY;
-
-
-      startPitch =
-        pitch;
-
-
-      renderer.domElement
-        .setPointerCapture(
-          event.pointerId
-        );
-
-
-      renderer.domElement
-        .style.cursor =
-        "grabbing";
+      guide.classList.add(
+        "hide"
+      );
 
     }
 
-  );
+  }
+
+);
 
 
-
-renderer.domElement
-  .addEventListener(
-
-    "pointermove",
-
-    event => {
-
-      if (
-        !dragging ||
-        !product
-      )
-        return;
-
-
-      const dx =
-        event.clientX -
-        startX;
-
-
-      const dy =
-        event.clientY -
-        startY;
-
-
-      /*
-         Horizontal drag
-         rotates PRODUCT
-      */
-
-      productRotationY =
-        startRotation +
-        dx * 0.008;
-
-
-      product.rotation.y =
-        productRotationY;
-
-
-      /*
-         Vertical drag
-         moves CAMERA upward
-
-         Drag upward
-         = look from above
-      */
-
-      pitch =
-        startPitch -
-        dy * 0.004;
-
-
-      pitch =
-        THREE.MathUtils.clamp(
-
-          pitch,
-
-          minPitch,
-
-          maxPitch
-
-        );
-
-
-      updateCamera();
-
-
-      if (
-        !hasInteracted &&
-        (
-          Math.abs(dx) > 6 ||
-          Math.abs(dy) > 6
-        )
-      ) {
-
-        hasInteracted =
-          true;
-
-
-        guide
-          .classList
-          .add(
-            "hide"
-          );
-
-      }
-
-    }
-
-  );
-
-
-
-function stopDragging(
+function endDrag(
   event
 ) {
 
@@ -1900,8 +1746,7 @@ function stopDragging(
     false;
 
 
-  renderer.domElement
-    .style.cursor =
+  renderer.domElement.style.cursor =
     "grab";
 
 
@@ -1919,82 +1764,75 @@ function stopDragging(
 }
 
 
+renderer.domElement.addEventListener(
+  "pointerup",
+  endDrag
+);
 
-renderer.domElement
-  .addEventListener(
-    "pointerup",
-    stopDragging
-  );
-
-
-renderer.domElement
-  .addEventListener(
-    "pointercancel",
-    stopDragging
-  );
+renderer.domElement.addEventListener(
+  "pointercancel",
+  endDrag
+);
 
 
-renderer.domElement
-  .style.cursor =
-  "grab";
+/* =====================================================
+   ★ WHEEL = PRODUCT ZOOM ONLY
+===================================================== */
+
+renderer.domElement.addEventListener(
+
+  "wheel",
+
+  event => {
+
+    event.preventDefault();
 
 
+    if (
+      event.deltaY < 0
+    ) {
 
-/* =============================================
-   ZOOM
-============================================= */
+      targetZoom *=
+        1.075;
 
-
-renderer.domElement
-  .addEventListener(
-
-    "wheel",
-
-    event => {
-
-      event.preventDefault();
-
-
-      radius +=
-        event.deltaY *
-        0.0012;
-
-
-      radius =
-        THREE.MathUtils.clamp(
-
-          radius,
-
-          minRadius,
-
-          maxRadius
-
-        );
-
-
-      updateCamera();
-
-
-      guide
-        .classList
-        .add(
-          "hide"
-        );
-
-    },
-
-    {
-      passive: false
     }
 
-  );
+    else {
+
+      targetZoom *=
+        0.93;
+
+    }
 
 
+    targetZoom =
+      THREE.MathUtils.clamp(
 
-/* =============================================
+        targetZoom,
+
+        minZoom,
+
+        maxZoom
+
+      );
+
+
+    guide.classList.add(
+      "hide"
+    );
+
+  },
+
+  {
+    passive: false
+  }
+
+);
+
+
+/* =====================================================
    RESET
-============================================= */
-
+===================================================== */
 
 document
   .getElementById(
@@ -2006,47 +1844,22 @@ document
 
     () => {
 
-      radius =
-        1.65;
+      targetYaw = 0;
 
+      targetPitch = 0;
 
-      pitch =
-        THREE.MathUtils
-          .degToRad(
-            13
-          );
+      targetZoom = 1;
 
-
-      productRotationY =
-        0;
-
-
-      if (product) {
-
-        product.rotation.y =
-          0;
-
-      }
-
-
-      updateCamera();
+      yawVelocity = 0;
 
     }
 
   );
 
 
-
-/* =============================================
+/* =====================================================
    BASIN COLOR
-============================================= */
-
-
-const basinName =
-  document.getElementById(
-    "basinName"
-  );
-
+===================================================== */
 
 document
   .querySelectorAll(
@@ -2056,64 +1869,51 @@ document
 
     button => {
 
-      button
-        .addEventListener(
+      button.addEventListener(
 
-          "click",
+        "click",
 
-          () => {
+        () => {
 
-            document
-              .querySelectorAll(
-                ".basin-swatch"
-              )
-              .forEach(
-                item =>
-                  item.classList
-                    .remove(
-                      "active"
-                    )
-              );
+          document
+            .querySelectorAll(
+              ".basin-swatch"
+            )
+            .forEach(
+              item =>
+                item.classList.remove(
+                  "active"
+                )
+            );
 
 
-            button
-              .classList
-              .add(
-                "active"
-              );
+          button.classList.add(
+            "active"
+          );
 
 
-            basinMaterial
-              .color
-              .set(
-                button.dataset.color
-              );
+          basinMaterial
+            .color
+            .set(
+              button.dataset.color
+            );
 
 
-            basinName
-              .textContent =
-              button.dataset.name;
+          basinName.textContent =
+            button.dataset.name;
 
-          }
+        }
 
-        );
+      );
 
     }
 
   );
 
 
-
-/* =============================================
+/* =====================================================
    TILE COLOR
-============================================= */
-
-
-const tileName =
-  document.getElementById(
-    "tileName"
-  );
-
+===================================================== */
 
 document
   .querySelectorAll(
@@ -2123,92 +1923,77 @@ document
 
     button => {
 
-      button
-        .addEventListener(
+      button.addEventListener(
 
-          "click",
+        "click",
 
-          () => {
+        () => {
 
-            document
-              .querySelectorAll(
-                ".tile-swatch"
-              )
-              .forEach(
-                item =>
-                  item.classList
-                    .remove(
-                      "active"
-                    )
-              );
-
-
-            button
-              .classList
-              .add(
-                "active"
-              );
-
-
-            setTileColor(
-              button.dataset.color
+          document
+            .querySelectorAll(
+              ".tile-swatch"
+            )
+            .forEach(
+              item =>
+                item.classList.remove(
+                  "active"
+                )
             );
 
 
-            tileName
-              .textContent =
-              button.dataset.name;
-
-          }
-
-        );
-
-    }
-
-  );
+          button.classList.add(
+            "active"
+          );
 
 
-
-/* =============================================
-   RESPONSIVE
-============================================= */
-
-
-window
-  .addEventListener(
-
-    "resize",
-
-    () => {
-
-      camera.aspect =
-        window.innerWidth /
-        window.innerHeight;
+          setTileColor(
+            button.dataset.color
+          );
 
 
-      camera
-        .updateProjectionMatrix();
+          tileName.textContent =
+            button.dataset.name;
 
+        }
 
-      renderer
-        .setSize(
-
-          window.innerWidth,
-
-          window.innerHeight
-
-        );
+      );
 
     }
 
   );
 
 
+/* =====================================================
+   RESIZE
+===================================================== */
 
-/* =============================================
-   RENDER LOOP
-============================================= */
+window.addEventListener(
 
+  "resize",
+
+  () => {
+
+    camera.aspect =
+      window.innerWidth /
+      window.innerHeight;
+
+
+    camera.updateProjectionMatrix();
+
+
+    renderer.setSize(
+      window.innerWidth,
+      window.innerHeight
+    );
+
+  }
+
+);
+
+
+/* =====================================================
+   ANIMATION
+===================================================== */
 
 function animate() {
 
@@ -2216,6 +2001,78 @@ function animate() {
     animate
   );
 
+
+  if (product) {
+
+    /*
+       손을 놓았을 때
+       아주 살짝 관성
+    */
+
+    if (
+      !dragging &&
+      Math.abs(
+        yawVelocity
+      ) > 0.00005
+    ) {
+
+      targetYaw +=
+        yawVelocity;
+
+      yawVelocity *=
+        0.91;
+
+    }
+
+
+    /*
+       부드럽게 목표값으로
+    */
+
+    currentYaw +=
+      (
+        targetYaw -
+        currentYaw
+      ) * 0.16;
+
+
+    currentPitch +=
+      (
+        targetPitch -
+        currentPitch
+      ) * 0.16;
+
+
+    currentZoom +=
+      (
+        targetZoom -
+        currentZoom
+      ) * 0.12;
+
+
+    /*
+       ★ 여기서 오직 제품만 변함
+    */
+
+    productPivot.rotation.y =
+      currentYaw;
+
+
+    productPivot.rotation.x =
+      currentPitch;
+
+
+    productPivot.scale.setScalar(
+      currentZoom
+    );
+
+  }
+
+
+  /*
+     CAMERA는 여기서
+     단 한 번도 변경하지 않음.
+  */
 
   renderer.render(
     scene,
