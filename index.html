@@ -1317,7 +1317,7 @@ const minPitch =
   THREE.MathUtils.degToRad(-3);
 
 const maxPitch =
-  THREE.MathUtils.degToRad(28);
+  THREE.MathUtils.degToRad(58);
 
 
 const minZoom = 0.82;
@@ -1673,7 +1673,7 @@ renderer.domElement.addEventListener(
     */
 
     targetYaw +=
-  dx * 0.010;
+  dx * 0.0075;
 
 targetYaw =
   THREE.MathUtils.clamp(
@@ -1688,7 +1688,7 @@ targetYaw =
     */
 
     yawVelocity =
-      dx * 0.0012;
+      dx * 0.0007;
 
 
     /*
@@ -2024,7 +2024,7 @@ function animate() {
       ) {
         yawVelocity = 0;
       } else {
-        yawVelocity *= 0.91;
+        yawVelocity *= 0.88;
       }
     }
 
@@ -2032,13 +2032,22 @@ function animate() {
        부드러운 보간
     */
     currentYaw +=
-      (targetYaw - currentYaw) * 0.16;
+  (
+    targetYaw -
+    currentYaw
+  ) * 0.095;
 
-    currentPitch +=
-      (targetPitch - currentPitch) * 0.16;
+currentPitch +=
+  (
+    targetPitch -
+    currentPitch
+  ) * 0.085;
 
-    currentZoom +=
-      (targetZoom - currentZoom) * 0.12;
+currentZoom +=
+  (
+    targetZoom -
+    currentZoom
+  ) * 0.08;
 
     /*
        카메라는 고정.
