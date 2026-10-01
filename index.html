@@ -403,7 +403,15 @@
 
         따라서 FrontColor만 변경한다.
       */
+const faucetMaterial = materials.find(
+  material => material.name === '_Metal_Corrugated_Shiny_1'
+);
 
+if (faucetMaterial) {
+  faucetMaterial.pbrMetallicRoughness.setBaseColorFactor([0.72, 0.74, 0.76, 1]);
+  faucetMaterial.pbrMetallicRoughness.setMetallicFactor(1.0);
+  faucetMaterial.pbrMetallicRoughness.setRoughnessFactor(0.22);
+}
       const basinMaterial = materials.find(
         material => material.name === 'FrontColor'
       );
