@@ -274,7 +274,7 @@
       min-field-of-view="25deg"
       max-field-of-view="45deg"
 
-      environment-image="neutral">
+      environment-image="legacy">
     </model-viewer>
 
 
@@ -409,7 +409,7 @@ const faucetMaterial = materials.find(
 
 if (faucetMaterial) {
  faucetMaterial.pbrMetallicRoughness.setBaseColorFactor([0.96, 0.97, 0.98, 1]);
-faucetMaterial.pbrMetallicRoughness.setMetallicFactor(0.68);
+faucetMaterial.pbrMetallicRoughness.setMetallicFactor(0.50);
 faucetMaterial.pbrMetallicRoughness.setRoughnessFactor(0.12);
 }
       const basinMaterial = materials.find(
