@@ -2,47 +2,62 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-  <title>MONOBATH 3D Viewer</title>
-
-  <script type="module"
-    src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js">
-  </script>
+  <title>MONOBATH Virtual View</title>
 
   <style>
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    html, body {
-      margin: 0;
+    html,
+    body {
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #E9E7E2;
+      background: #F7F6F3;
       font-family: Arial, sans-serif;
     }
 
-    .viewer {
+    #viewer {
       position: relative;
-      width: 100%;
+      width: 100vw;
       height: 100vh;
-      min-height: 500px;
+      overflow: hidden;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
       background: #F7F6F3;
     }
 
-    model-viewer {
-      width: 100%;
-      height: 100%;
-      background: transparent;
-
-      --poster-color: transparent;
-      --progress-bar-color: #2E2E2E;
+    #viewer.dragging {
+      cursor: grabbing;
     }
 
-    /* MONOBATH / MONO 600 */
-    .label {
+    #panorama {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+
+      height: 100%;
+      width: auto;
+
+      max-width: none;
+      max-height: none;
+
+      transform: translate(-50%, -50%);
+      transform-origin: center center;
+
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .brand {
       position: absolute;
       top: 28px;
       left: 32px;
@@ -50,483 +65,241 @@
       pointer-events: none;
     }
 
-    .label-small {
-      margin-bottom: 7px;
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.18em;
-      color: #A49E94;
-    }
-
-    .label-title {
-      font-size: 18px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      color: #2E2E2E;
-    }
-
-    /* 색상 선택 영역 */
-    .controls {
-      position: absolute;
-      right: 34px;
-      bottom: 34px;
-      z-index: 20;
-
-      padding: 18px 20px 16px;
-
-      background: rgba(247, 246, 243, 0.90);
-      backdrop-filter: blur(10px);
-
-      border: 1px solid rgba(46, 46, 46, 0.10);
-      border-radius: 4px;
-    }
-
-    .control-title {
-      margin-bottom: 14px;
-
+    .brand-small {
       font-size: 10px;
+      letter-spacing: 0.22em;
+      color: #A49E94;
+      margin-bottom: 7px;
+    }
+
+    .brand-title {
+      font-size: 15px;
       font-weight: 600;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.05em;
       color: #2E2E2E;
-    }
-
-    .swatches {
-      display: flex;
-      gap: 12px;
-    }
-
-    .swatch {
-      width: 26px;
-      height: 26px;
-
-      padding: 0;
-      border-radius: 50%;
-
-      border: 1px solid rgba(46, 46, 46, 0.18);
-      cursor: pointer;
-
-      transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-    }
-
-    .swatch:hover {
-      transform: scale(1.08);
-    }
-
-    .swatch.active {
-      box-shadow:
-        0 0 0 2px #F7F6F3,
-        0 0 0 3px #2E2E2E;
-    }
-
-    /* Frozen White - 우선 기본색 */
-    .frozen {
-      background: #EDEDEA;
-    }
-
-    /* Pure White */
-    .pure {
-      background: #FAFAF8;
-    }
-
-    /* Sand Beige */
-    .sand {
-      background: #D8CDBA;
-    }
-
-    /* Urban Grey */
-    .urban {
-      background: #8E8E89;
-    }
-
-    .color-name {
-      margin-top: 12px;
-
-      min-width: 120px;
-
-      font-size: 11px;
-      letter-spacing: 0.04em;
-      color: #777;
     }
 
     .guide {
       position: absolute;
-      bottom: 25px;
       left: 50%;
+      bottom: 26px;
       transform: translateX(-50%);
       z-index: 10;
 
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      color: #777;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      color: rgba(46, 46, 46, 0.52);
 
-      pointer-events: none;
       white-space: nowrap;
+      pointer-events: none;
     }
 
-    @media (max-width: 700px) {
-      .label {
+    .close {
+      position: absolute;
+      top: 24px;
+      right: 28px;
+      z-index: 20;
+
+      width: 42px;
+      height: 42px;
+
+      border: 1px solid rgba(46,46,46,0.18);
+      border-radius: 50%;
+
+      background: rgba(247,246,243,0.82);
+      backdrop-filter: blur(8px);
+
+      color: #2E2E2E;
+      font-size: 23px;
+      font-weight: 300;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+
+      .brand {
         top: 20px;
         left: 20px;
       }
 
-      .controls {
-        right: 20px;
-        bottom: 55px;
+      .close {
+        top: 16px;
+        right: 16px;
       }
 
       .guide {
-        bottom: 18px;
+        bottom: 20px;
         font-size: 9px;
       }
+
+      #panorama {
+        height: 100%;
+      }
     }
-
-    /* TILE SELECTOR */
-.tile-divider {
-  width: 100%;
-  height: 1px;
-  background: #E1DED8;
-  margin: 14px 0 12px;
-}
-
-.tile-swatches {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.tile-swatch {
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  border: 1px solid #C9C6C0;
-  padding: 0;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.tile-swatch:hover {
-  transform: scale(1.08);
-}
-
-.tile-swatch.active {
-  box-shadow:
-    0 0 0 2px #F7F6F3,
-    0 0 0 3px #2E2E2E;
-}
-
-.tile-white {
-  background: #EDEBE6;
-}
-
-.tile-ivory {
-  background: #D8D0C2;
-}
-
-.tile-grey {
-  background: #AAA9A5;
-}
-
-.tile-charcoal {
-  background: #4A4946;
-}
-
-.tile-name {
-  margin-top: 9px;
-  font-size: 11px;
-  color: #777;
-}
   </style>
 </head>
 
 <body>
 
-  <div class="viewer">
+  <div id="viewer">
 
-    <div class="label">
-      <div class="label-small">MONOBATH</div>
-      <div class="label-title">MONO 600</div>
+    <img
+      id="panorama"
+      src="./MONOBATH_PANORAMA.png"
+      alt="MONOBATH panoramic bathroom">
+
+    <div class="brand">
+      <div class="brand-small">MONOBATH</div>
+      <div class="brand-title">VIRTUAL VIEW</div>
     </div>
 
-    <model-viewer
-      id="monoViewer"
-
-      src="./MONOBATH_MONO600.glb"
-
-      alt="MONOBATH MONO 600 seamless basin"
-
-      camera-controls
-      touch-action="pan-y"
-
-      interaction-prompt="none"
-
-      shadow-intensity="0.7"
-      shadow-softness="0.9"
-
-      exposure="1.0"
-
-      camera-orbit="0deg 75deg auto"
-      min-camera-orbit="-90deg 55deg auto"
-      max-camera-orbit="90deg 100deg auto"
-
-      min-field-of-view="25deg"
-      max-field-of-view="45deg"
-
-      environment-image="./white_studio_06_1k.hdr">
-    </model-viewer>
-
-
-    <div class="controls">
-
-      <div class="control-title">
-        BASIN COLOR
-      </div>
-
-      <div class="swatches">
-
-        <button
-          class="swatch frozen active"
-          data-color="#D8D8D3"
-          data-name="Frozen White"
-          aria-label="Frozen White">
-        </button>
-
-        <button
-          class="swatch pure"
-          data-color="#F3F2EE"
-          data-name="Pure White"
-          aria-label="Pure White">
-        </button>
-
-        <button
-          class="swatch sand"
-          data-color="#C6B28F"
-          data-name="Sand Beige"
-          aria-label="Sand Beige">
-        </button>
-
-        <button
-          class="swatch urban"
-          data-color="#6F706D"
-          data-name="Urban Grey"
-          aria-label="Urban Grey">
-        </button>
-
-      </div>
-
-      <div class="color-name" id="colorName">
-  Frozen White
-</div>
-
-<div class="tile-divider"></div>
-
-<div class="control-title">
-  TILE
-</div>
-
-<div class="tile-swatches">
-
-  <button
-    class="tile-swatch tile-white active"
-    data-tile="white"
-    data-name="White Tile"
-    aria-label="White Tile">
-  </button>
-
-  <button
-    class="tile-swatch tile-ivory"
-    data-tile="ivory"
-    data-name="Ivory Tile"
-    aria-label="Ivory Tile">
-  </button>
-
-  <button
-    class="tile-swatch tile-grey"
-    data-tile="grey"
-    data-name="Grey Tile"
-    aria-label="Grey Tile">
-  </button>
-
-  <button
-    class="tile-swatch tile-charcoal"
-    data-tile="charcoal"
-    data-name="Charcoal Tile"
-    aria-label="Charcoal Tile">
-  </button>
-
-</div>
-
-<div class="tile-name" id="tileName">
-  White Tile
-</div>
-
-</div>
-
+    <button class="close"
+            onclick="closeViewer()"
+            aria-label="Close">
+      ×
+    </button>
 
     <div class="guide">
-      DRAG TO EXPLORE · SCROLL TO ZOOM
+      DRAG TO EXPLORE
     </div>
 
   </div>
 
 
   <script>
-    const viewer = document.querySelector('#monoViewer');
-    const buttons = document.querySelectorAll('.swatch');
-    const colorName = document.querySelector('#colorName');
 
-    function hexToRGBA(hex) {
-      const cleanHex = hex.replace('#', '');
+    const viewer = document.getElementById('viewer');
+    const panorama = document.getElementById('panorama');
 
-      const r = parseInt(cleanHex.substring(0, 2), 16) / 255;
-      const g = parseInt(cleanHex.substring(2, 4), 16) / 255;
-      const b = parseInt(cleanHex.substring(4, 6), 16) / 255;
+    let dragging = false;
 
-      return [r, g, b, 1];
+    let startX = 0;
+    let startY = 0;
+
+    let currentX = 0;
+    let currentY = 0;
+
+    let startOffsetX = 0;
+    let startOffsetY = 0;
+
+    const verticalLimit = 35;
+
+
+    function getHorizontalLimit() {
+
+      const imageWidth = panorama.offsetWidth;
+      const viewerWidth = viewer.offsetWidth;
+
+      return Math.max(
+        0,
+        (imageWidth - viewerWidth) / 2
+      );
     }
 
-    viewer.addEventListener('load', () => {
 
-      const materials = viewer.model.materials;
+    function updatePosition() {
 
-      console.log(
-        'MONOBATH materials:',
-        materials.map(material => material.name)
+      const horizontalLimit = getHorizontalLimit();
+
+      currentX = Math.max(
+        -horizontalLimit,
+        Math.min(horizontalLimit, currentX)
       );
 
-      /*
-        Blender GLB에서 확인한 재질:
-        - _Metal_Corrugated_Shiny_1 = 수전 계열
-        - FrontColor = 세면대 본체
-
-        따라서 FrontColor만 변경한다.
-      */
-const faucetMaterial = materials.find(
-  material => material.name === '_Metal_Corrugated_Shiny_1'
-);
-
-if (faucetMaterial) {
- faucetMaterial.pbrMetallicRoughness.setBaseColorFactor([0.96, 0.97, 0.98, 1]);
-faucetMaterial.pbrMetallicRoughness.setMetallicFactor(0.50);
-faucetMaterial.pbrMetallicRoughness.setRoughnessFactor(0.12);
-}
-      const basinMaterial = materials.find(
-        material => material.name === 'FrontColor'
+      currentY = Math.max(
+        -verticalLimit,
+        Math.min(verticalLimit, currentY)
       );
 
-      if (!basinMaterial) {
-        console.error('FrontColor material not found.');
-        return;
+      panorama.style.transform =
+        `translate(calc(-50% + ${currentX}px),
+                   calc(-50% + ${currentY}px))`;
+    }
+
+
+    viewer.addEventListener('pointerdown', (event) => {
+
+      dragging = true;
+
+      viewer.classList.add('dragging');
+
+      startX = event.clientX;
+      startY = event.clientY;
+
+      startOffsetX = currentX;
+      startOffsetY = currentY;
+
+      viewer.setPointerCapture(event.pointerId);
+    });
+
+
+    viewer.addEventListener('pointermove', (event) => {
+
+      if (!dragging) return;
+
+      const deltaX = event.clientX - startX;
+      const deltaY = event.clientY - startY;
+
+      currentX = startOffsetX + deltaX;
+      currentY = startOffsetY + deltaY * 0.25;
+
+      updatePosition();
+    });
+
+
+    viewer.addEventListener('pointerup', (event) => {
+
+      dragging = false;
+
+      viewer.classList.remove('dragging');
+
+      try {
+        viewer.releasePointerCapture(event.pointerId);
+      } catch (e) {}
+    });
+
+
+    viewer.addEventListener('pointercancel', () => {
+
+      dragging = false;
+
+      viewer.classList.remove('dragging');
+    });
+
+
+    panorama.addEventListener('load', () => {
+
+      currentX = 0;
+      currentY = 0;
+
+      updatePosition();
+    });
+
+
+    window.addEventListener('resize', updatePosition);
+
+
+    function closeViewer() {
+
+      if (window.parent !== window) {
+
+        window.parent.postMessage(
+          'MONOBATH_CLOSE_VIEWER',
+          '*'
+        );
+
+      } else {
+
+        window.history.back();
+
       }
+    }
 
-      /* MMA 솔리드서피스 느낌 */
-      basinMaterial.pbrMetallicRoughness.setMetallicFactor(0.0);
-      basinMaterial.pbrMetallicRoughness.setRoughnessFactor(0.38);
-
-
-      buttons.forEach(button => {
-
-        button.addEventListener('click', () => {
-
-          const selectedColor =
-            button.getAttribute('data-color');
-
-          const selectedName =
-            button.getAttribute('data-name');
-
-          basinMaterial
-            .pbrMetallicRoughness
-            .setBaseColorFactor(
-              hexToRGBA(selectedColor)
-            );
-
-          basinMaterial
-            .pbrMetallicRoughness
-            .setMetallicFactor(0.0);
-
-          basinMaterial
-            .pbrMetallicRoughness
-            .setRoughnessFactor(0.58);
-
-
-          buttons.forEach(item =>
-            item.classList.remove('active')
-          );
-
-          button.classList.add('active');
-
-          colorName.textContent = selectedName;
-        });
-
-      });
-
-    });
-
-    /* TILE BACKGROUND CONTROL */
-const tileButtons = document.querySelectorAll('.tile-swatch');
-const tileName = document.getElementById('tileName');
-const viewerArea = document.querySelector('.viewer');
-
-const tileBackgrounds = {
-  white: {
-    name: 'White Tile',
-    base: '#E7E4DE',
-    line: '#D1CDC5'
-  },
-  ivory: {
-    name: 'Ivory Tile',
-    base: '#D8D0C2',
-    line: '#C0B7A8'
-  },
-  grey: {
-    name: 'Grey Tile',
-    base: '#AAA9A5',
-    line: '#92918D'
-  },
-  charcoal: {
-    name: 'Charcoal Tile',
-    base: '#4A4946',
-    line: '#5E5C58'
-  }
-};
-
-function applyTile(tileKey) {
-  const tile = tileBackgrounds[tileKey];
-  if (!tile) return;
-
-  viewerArea.style.backgroundColor = tile.base;
-
-  viewerArea.style.backgroundImage = `
-  linear-gradient(to right, ${tile.line} 1px, transparent 1px),
-  linear-gradient(to bottom, ${tile.line} 1px, transparent 1px),
-  radial-gradient(circle at 30% 25%, rgba(255,255,255,0.10), transparent 45%),
-  radial-gradient(circle at 70% 70%, rgba(0,0,0,0.018), transparent 50%)
-`;
-
-viewerArea.style.backgroundSize =
-  '420px 420px, 420px 420px, 100% 100%, 100% 100%';
-
-  tileName.textContent = tile.name;
-}
-
-tileButtons.forEach(button => {
-  button.addEventListener('click', () => {
-
-    const selectedTile = button.getAttribute('data-tile');
-
-    tileButtons.forEach(item => {
-      item.classList.remove('active');
-    });
-
-    button.classList.add('active');
-
-    applyTile(selectedTile);
-  });
-});
-
-applyTile('white');
   </script>
 
 </body>
